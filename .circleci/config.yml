@@ -1,0 +1,41 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: reflectivedk/circleci-docker-and-gcloud
+    steps:
+      - checkout
+      #- add_ssh_keys
+      - setup_remote_docker
+      - run:
+          name: Authenticate gcloud
+          command: |
+            echo $GCLOUD_SERVICE_KEY | base64 -d > ${HOME}/gcloud-service-key.json
+            gcloud auth activate-service-account --key-file ${HOME}/gcloud-service-key.json
+      - run:
+          name: Build application Docker image
+          command: |
+            gcloud docker -- build -t gcr.io/city-7337/modelapi service-image
+      - run:
+          name: Build application test Docker image
+          command: |
+            gcloud docker -- build -t modelapi-service-test test-image
+      - run:
+          name: Run unit tests
+          command: |
+            gcloud docker -- run modelapi-service-test /bin/sh run-unit-tests.sh
+      - run:
+          name: Run modelapi service
+          command: |
+            gcloud docker -- run -d --name modelapi -p 8080:8080 gcr.io/city-7337/modelapi
+            sleep 5
+      - run:
+          name: Logs
+          command: |
+            docker logs modelapi
+      - deploy:
+          name: Push application Docker image
+          command: |
+            if [ "${CIRCLE_BRANCH}" == "master" ]; then
+              gcloud docker -- push gcr.io/city-7337/modelapi
+            fi

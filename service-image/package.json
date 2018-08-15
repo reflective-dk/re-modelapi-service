@@ -1,0 +1,13 @@
+{
+  "name": "modelapi",
+  "dependencies": {
+    "re-modelapi-service": "git+ssh://git@github.com:reflective-dk/re-modelapi-service.git"
+  },
+  "scripts": {
+    "start": "modelapi"
+  },
+  "config": {
+    "logLevel": "info",
+    "serviceName": "modelapi"
+  }
+}
