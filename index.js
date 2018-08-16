@@ -2,18 +2,19 @@
 
 "use strict";
 
-var express = require('express');
+var requireDirectory = require('require-directory');
 
 var packageJson = require.main.require('./package.json');
 var logger = require('./lib/logger');
+var initModelApi = require('./lib/init-model-api');
 
-const auth = require('re-auth').middleware;
+var auth = require('re-auth').middleware;
 var JWT_SECRET = process.env['JWT_SECRET'];
 
-var diff = require('./lib/diff');
-var delta = require('./lib/delta');
-
+var express = require('express');
 var app = express();
+
+var modelApis = requireDirectory(module, './model-apis');
 
 module.exports = app.listen(8080, function() {
     logger.info('service ready');
@@ -22,16 +23,14 @@ module.exports = app.listen(8080, function() {
 app.get('/', function(request, response) {
     response.send({
         'package.json': packageJson,
-        operations: [ 'diff', 'delta' ]
+        'model-apis': Object.keys(modelApis)
     });
 });
 
-// === NOTE: Ordering matters below ===
-
-// Operations streaming their request body first
-app.post('/delta', delta);
-app.post('/api/core/delta', auth(JWT_SECRET), delta);
-
-// Operations reading their request body as json below
-app.post('/diff', express.json(), diff);
-app.post('/api/core/diff', auth(JWT_SECRET), express.json(), diff);
+Object.keys(modelApis).forEach(function(apiKey) {
+    initModelApi(modelApis[apiKey], function initRoute(route, handler) {
+        app.get(route, handler);
+        app.post(route, express.json(), handler);
+        app.post(route, auth(JWT_SECRET), express.json(), handler);
+    });
+});

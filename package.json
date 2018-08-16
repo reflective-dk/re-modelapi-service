@@ -32,6 +32,7 @@
     "re-auth": "git+ssh://git@github.com/reflective-dk/re-auth.git",
     "re-stream-util": "git+ssh://git@github.com/reflective-dk/re-stream-util.git",
     "reflective-api": "git+ssh://git@github.com/reflective-dk/reflective-api.git",
+    "require-directory": "^2.1.1",
     "ternary-stream": "^2.0.1",
     "through2": "^2.0.3",
     "uuid": "^3.1.0"
