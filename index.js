@@ -1,19 +1,11 @@
 #!/usr/bin/env node
-/*global global_logger*/
+
 "use strict";
 
-var bunyan = require('bunyan');
 var express = require('express');
 
-var path = require('path');
-var packageFile = path.join(path.dirname(require.resolve('./index')), 'package.json');
-var packageJson = require(packageFile);
-var config = packageJson.config;
-global.global_logger = bunyan.createLogger({
-    name: config.serviceName,
-    level: config.logLevel
-});
-const logger = global_logger;
+var packageJson = require.main.require('./package.json');
+var logger = require('./lib/logger');
 
 const auth = require('re-auth').middleware;
 var JWT_SECRET = process.env['JWT_SECRET'];
