@@ -1,86 +1,106 @@
 "use strict";
 
+var Promise = require('bluebird');
 var chai = require('chai');
+chai.use(require('chai-as-promised'));
 var expect = chai.expect;
 var uuid = require('uuid');
 
+var initModelApi = require('../lib/init-model-api');
+
+var context = '{"domain":"dummy-context"}';
+var headers = { 'Content-type': 'application/json', context: context };
+
+var apiSpec = {
+    key: 'foo',
+    types: {
+        bar: {
+            key: 'bar',
+            singular: 'bar',
+            plural: 'bars',
+            classId: 'bar-class-id'
+        },
+        baz: {
+            key: 'baz',
+            singular: 'baz',
+            plural: 'bazzes',
+            classId: 'baz-class-id'
+        }
+    }
+};
+
+var dummyObject = { id: 'some-id', snapshot: { jazz: 42 } };
+
 describe('API Initialization', function() {
+    beforeEach(_beforeEach);
 
-    describe('diff operation', function() {
-        it('should return diff objects for a given extension', function(done) {
-            expect(rp({
-                uri: serviceUrl + '/diff',
-                method: 'POST',
-                headers: headers,
-                body: { extension: this.testExtension },
-                json: true
-            }).then(function(result) {
-                return result.objects.map(snap);
-            })).to.eventually.become([
-                { id: 'foo', snapshot: { name: 'fooAfter' },
-                  from: '2018-02-02T00:00:00.000Z' }
-            ]).notify(done);
-        });
-
-        it('should reject calls without a context', function(done) {
-            expect(rp({
-                uri: serviceUrl + '/diff',
-                method: 'POST',
-                body: { extension: this.testExtension },
-                json: true
-            })).to.eventually.be.rejectedWith(rp.StatusCodeError, /400 - ".*missing header.*"/)
+    describe('initModelApi', function() {
+        it('should initialize operation for api spec', function(done) {
+            initModelApi(apiSpec, this.initRoute, this.mockApi);
+            expect(this.op('foo'))
+                .to.eventually.deep.equal({ status: 200, body: apiSpec })
                 .notify(done);
         });
-});
 
-    describe('delta operation', function() {
-        it('should create a delta based on supplied objects', function(done) {
-            expect(rp({
-                uri: serviceUrl + '/delta',
-                method: 'POST',
-                headers: headers,
-                body: { objects: [ this.afterAsTrace.foo, this.afterAsTrace.bar ] },
-                json: true
-            }).then(function(result) {
-                return result.objects.map(snap);
-            })).to.eventually.become([
-                { id: 'foo', snapshot: { name: 'fooAfter' },
-                  from: '2018-02-02T00:00:00.000Z' }
-            ]).notify(done);
+        it('should initialize operation for single instance', function(done) {
+            initModelApi(apiSpec, this.initRoute, this.mockApi);
+            expect(this.op('foo/bar/:instanceId'))
+                .to.eventually.deep.equal({ status: 200, body: dummyObject })
+                .notify(done);
         });
 
-        it('should use \'from\' setting of \'after\' object', function(done) {
-            expect(rp({
-                uri: serviceUrl + '/delta',
-                method: 'POST',
-                headers: headers,
-                body: { objects: [ this.afterAsTrace.foo ] },
-                json: true
-            }).then(function(result) {
-                return snap(result.objects[0]).from;
-            })).to.eventually.become(this.after.foo.from).notify(done);
-        });
-
-        it('should not report mapped value that\'s part of a larger group of existing values', function(done) {
-            expect(rp({
-                uri: serviceUrl + '/delta',
-                method: 'POST',
-                headers: headers,
-                body: { objects: [ this.afterAsTrace.baz ] },
-                json: true
-            }).then(function(result) {
-                return result.objects.map(snap);
-            })).to.eventually.be.empty.notify(done);
-        });
-
-        it('should reject calls without a context', function(done) {
-            expect(rp({
-                uri: serviceUrl + '/delta',
-                method: 'POST',
-                body: { extension: this.testExtension },
-                json: true
-            })).to.eventually.be.rejectedWith(rp.StatusCodeError, /400 - ".*missing header.*"/)
+        it('should initialize operation for instance collection', function(done) {
+            initModelApi(apiSpec, this.initRoute, this.mockApi);
+            expect(this.op('foo/bars'))
+                .to.eventually.deep.equal({ status: 200, body: [ dummyObject ] })
                 .notify(done);
         });
     });
 });
+
+function _beforeEach() {
+    var self = this;
+    var handlers = {};
+    var request = {
+        params: { instanceId: 'some-id', classId: 'bar-class-id' },
+        header: function() { return context; }
+    };
+    var response = {
+        status: function(status) { self.status = status; },
+        send: function(result) { self.result = result; }
+    };
+    this.initRoute = function(route, handler) {
+        handlers[route] = function(req, res) {
+            return Promise.resolve(handler(req, res))
+                .then(function() {
+                    return {
+                        status: self.status || 200,
+                        body: self.result
+                    };
+                });
+        };
+    };
+
+    this.mockApi = { promise: { index: {
+        snapshot: function(args) {
+            if (JSON.stringify(args.context) === context
+                && args.objects[0].id === 'some-id') {
+                return Promise.resolve({ objects: [ dummyObject ] });
+            } else {
+                return Promise.reject('invalid args');
+            }
+        },
+        query: function(args) {
+            if (JSON.stringify(args.context) === context
+                && args.query.relatesTo.class === 'bar-class-id') {
+                return Promise.resolve({ objects: [ dummyObject ] });
+            } else {
+                return Promise.reject('invalid args');
+            }
+        }
+    } } };
+
+    this.op = function(route) {
+        return handlers[route](request, response);
+    };
+}
