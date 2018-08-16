@@ -28,9 +28,11 @@ app.get('/', function(request, response) {
 });
 
 Object.keys(modelApis).forEach(function(apiKey) {
+    var prefix = '/api/modelapi/';
     initModelApi(modelApis[apiKey], function initRoute(route, handler) {
-        app.get(route, handler);
-        app.post(route, express.json(), handler);
-        app.post(route, auth(JWT_SECRET), express.json(), handler);
+        app.get('/' + route, handler);
+        app.get(prefix + route, handler);
+        app.post('/' + route, express.json(), handler);
+        app.post(prefix + route, auth(JWT_SECRET), express.json(), handler);
     });
 });
