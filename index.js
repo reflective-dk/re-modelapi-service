@@ -7,6 +7,7 @@ var requireyml = require('require-yml');
 var packageJson = require.main.require('./package.json');
 var logger = require('./lib/logger');
 var initModelApi = require('./lib/init-model-api');
+var api = new (require('reflective-api'))();
 
 var auth = require('re-auth').middleware;
 var JWT_SECRET = process.env['JWT_SECRET'];
@@ -34,5 +35,5 @@ Object.keys(modelApis).forEach(function(apiKey) {
         app.get(prefix + route, handler);
         app.post('/' + route, express.json(), handler);
         app.post(prefix + route, auth(JWT_SECRET), express.json(), handler);
-    });
+    }, api);
 });
