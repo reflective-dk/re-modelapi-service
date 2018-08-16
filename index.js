@@ -2,7 +2,7 @@
 
 "use strict";
 
-var requireDirectory = require('require-directory');
+var requireyml = require('require-yml');
 
 var packageJson = require.main.require('./package.json');
 var logger = require('./lib/logger');
@@ -14,7 +14,7 @@ var JWT_SECRET = process.env['JWT_SECRET'];
 var express = require('express');
 var app = express();
 
-var modelApis = requireDirectory(module, './model-apis');
+var modelApis = requireyml('./model-apis');
 
 module.exports = app.listen(8080, function() {
     logger.info('service ready');
@@ -23,7 +23,7 @@ module.exports = app.listen(8080, function() {
 app.get('/', function(request, response) {
     response.send({
         'package.json': packageJson,
-        'model-apis': Object.keys(modelApis)
+        'model-apis': modelApis
     });
 });
 
