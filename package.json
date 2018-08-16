@@ -1,7 +1,7 @@
 {
   "name": "re-modelapi-service",
   "version": "0.1.0",
-  "description": "Service model-specific access to data",
+  "description": "Service to provide model-specific access to data",
   "main": "index.js",
   "bin": {
     "modelapi": "index.js"
