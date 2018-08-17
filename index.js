@@ -15,7 +15,7 @@ var JWT_SECRET = process.env['JWT_SECRET'];
 var express = require('express');
 var app = express();
 
-var modelApis = requireyml('./model-apis');
+var modelApis = requireyml(__dirname + '/model-apis');
 
 module.exports = app.listen(8080, function() {
     logger.info('service ready');
