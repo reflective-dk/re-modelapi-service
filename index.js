@@ -29,7 +29,7 @@ app.get('/', function(request, response) {
 });
 
 Object.keys(modelApis).forEach(function(apiKey) {
-    var prefix = '/api/modelapi/';
+    var prefix = '/api/model/';
     initModelApi(modelApis[apiKey], function(route, handler) {
         app.get('/' + route, handler);
         app.get(prefix + route, handler);
