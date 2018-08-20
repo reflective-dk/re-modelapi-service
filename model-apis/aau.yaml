@@ -1,0 +1,9 @@
+---
+key: ro
+types:
+  unit:
+    key: unit
+    singular: unit
+    plural: units
+    classId: eeb7a693-5013-456b-a26d-a571bd057438
+...
