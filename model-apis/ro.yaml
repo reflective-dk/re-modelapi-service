@@ -55,7 +55,7 @@ types:
     key: role
     singular: role
     plural: roles
-    classId: 025dfd36-f7a6-41e3-aa0c-64fe0376d3b7
+    classId: c4be5a95-1320-4996-b219-e2f6f7cef8dd
   systemAccess:
     key: systemAccess
     singular: system-access
