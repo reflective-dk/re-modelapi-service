@@ -11,47 +11,44 @@ var initModelApi = require('../lib/init-model-api');
 var context = '{"domain":"dummy-context"}';
 var headers = { 'Content-type': 'application/json', context: context };
 
-var apiSpec = {
-    key: 'foo',
-    types: {
-        bar: {
-            key: 'bar',
-            singular: 'bar',
-            plural: 'bars',
-            classId: 'bar-class-id'
-        },
-        baz: {
-            key: 'baz',
-            singular: 'baz',
-            plural: 'bazzes',
-            classId: 'baz-class-id'
-        }
+var dummyObject = { id: 'some-id', snapshot: {
+    class: { id: 'primary-class-id' },
+    jazz: 42, funk: { id: 'funky-object' }
+} };
+var primaryClass = { id: 'primary-class-id', snapshot: {
+    class: { id: 'class-class-id' },
+    properties: {
+        jazz: { type: 'simple', dataType: 'string' },
+        funk: { type: 'simple', dataType: {
+            type: 'relation', target: { id: 'secondary-class-id' } } }
     }
-};
-
-var dummyObject = { id: 'some-id', snapshot: { jazz: 42 } };
+} };
+var secondaryClass = { id: 'secondary-class-id', snapshot: {
+    class: { id: 'class-class-id' },
+    properties: { bebop: { type: 'simple', dataType: 'string' } }
+} };
 
 describe('API Initialization', function() {
     beforeEach(_beforeEach);
 
     describe('initModelApi', function() {
         it('should initialize operation for api spec', function(done) {
-            initModelApi(apiSpec, this.initRoute, this.mockApi);
-            expect(this.op('foo'))
-                .to.eventually.deep.equal({ status: 200, body: apiSpec })
+            initModelApi('jerky', this.modelApis, this.initRoute, this.mockApi);
+            expect(this.op('jerky'))
+                .to.eventually.deep.equal({ status: 200, body: this.modelApis['jerky'] })
                 .notify(done);
         });
 
         it('should initialize operation for single instance', function(done) {
-            initModelApi(apiSpec, this.initRoute, this.mockApi);
-            expect(this.op('foo/bar/:instanceId'))
+            initModelApi('jerky', this.modelApis, this.initRoute, this.mockApi);
+            expect(this.op('jerky/bar/:instanceId'))
                 .to.eventually.deep.equal({ status: 200, body: [ dummyObject ] })
                 .notify(done);
         });
 
         it('should initialize operation for instance collection', function(done) {
-            initModelApi(apiSpec, this.initRoute, this.mockApi);
-            expect(this.op('foo/bars'))
+            initModelApi('jerky', this.modelApis, this.initRoute, this.mockApi);
+            expect(this.op('jerky/bars'))
                 .to.eventually.deep.equal({ status: 200, body: [ dummyObject ] })
                 .notify(done);
         });
@@ -69,6 +66,27 @@ function _beforeEach() {
         status: function(status) { self.status = status; },
         send: function(result) { self.result = result; }
     };
+
+    this.modelApis = {
+        jerky: {
+            key: 'jerky',
+            types: {
+                bar: {
+                    key: 'bar',
+                    singular: 'bar',
+                    plural: 'bars',
+                    classId: 'bar-class-id'
+                },
+                baz: {
+                    key: 'baz',
+                    singular: 'baz',
+                    plural: 'bazzes',
+                    classId: 'baz-class-id'
+                }
+            }
+        }
+    };
+
     this.initRoute = function(route, handler) {
         handlers[route] = function(req, res) {
             return Promise.resolve(handler(req, res))
@@ -83,10 +101,17 @@ function _beforeEach() {
 
     this.mockApi = { promise: { index: {
         snapshot: function(args) {
-            if (JSON.stringify(args.context) === context
-                && args.objects[0].id === 'some-id') {
+            switch (true) {
+            case JSON.stringify(args.context) === context
+                    && args.objects[0].id === 'some-id':
                 return Promise.resolve({ objects: [ dummyObject ] });
-            } else {
+            case JSON.stringify(args.context) === context
+                    && args.objects[0].id === 'primary-class-id':
+                return Promise.resolve({ objects: [ primaryClass ] });
+            case JSON.stringify(args.context) === context
+                    && args.objects[0].id === 'secondary-class-id':
+                return Promise.resolve({ objects: [ secondaryClass ] });
+            default:
                 return Promise.reject('invalid args');
             }
         },
