@@ -11,23 +11,6 @@ var initModelApi = require('../lib/init-model-api');
 var context = '{"domain":"dummy-context"}';
 var headers = { 'Content-type': 'application/json', context: context };
 
-var dummyObject = { id: 'some-id', snapshot: {
-    class: { id: 'primary-class-id' },
-    jazz: 42, funk: { id: 'funky-object' }
-} };
-var primaryClass = { id: 'primary-class-id', snapshot: {
-    class: { id: 'class-class-id' },
-    properties: {
-        jazz: { type: 'simple', dataType: 'string' },
-        funk: { type: 'simple', dataType: {
-            type: 'relation', target: { id: 'secondary-class-id' } } }
-    }
-} };
-var secondaryClass = { id: 'secondary-class-id', snapshot: {
-    class: { id: 'class-class-id' },
-    properties: { bebop: { type: 'simple', dataType: 'string' } }
-} };
-
 describe('API Initialization', function() {
     beforeEach(_beforeEach);
 
@@ -42,14 +25,14 @@ describe('API Initialization', function() {
         it('should initialize operation for single instance', function(done) {
             initModelApi('jerky', this.modelApis, this.initRoute, this.mockApi);
             expect(this.op('jerky/bar/:instanceId'))
-                .to.eventually.deep.equal({ status: 200, body: [ dummyObject ] })
+                .to.eventually.deep.equal({ status: 200, body: [ this.dummyObject ] })
                 .notify(done);
         });
 
         it('should initialize operation for instance collection', function(done) {
             initModelApi('jerky', this.modelApis, this.initRoute, this.mockApi);
             expect(this.op('jerky/bars'))
-                .to.eventually.deep.equal({ status: 200, body: [ dummyObject ] })
+                .to.eventually.deep.equal({ status: 200, body: [ this.dummyObject ] })
                 .notify(done);
         });
     });
@@ -67,21 +50,40 @@ function _beforeEach() {
         send: function(result) { self.result = result; }
     };
 
+    this.dummyObject = { id: 'some-id', snapshot: {
+        class: { id: 'foo-class-id' },
+        jazz: 42, funk: { id: 'funky-object' }
+    } };
+
+    this.fooClass = { id: 'foo-class-id', snapshot: {
+        class: { id: 'class-class-id' },
+        properties: {
+            jazz: { type: 'simple', dataType: 'string' },
+            funk: { type: 'simple', dataType: {
+                type: 'relation', target: { id: 'bar-class-id' } } }
+        }
+    } };
+
+    this.barClass = { id: 'bar-class-id', snapshot: {
+        class: { id: 'class-class-id' },
+        properties: { bebop: { type: 'simple', dataType: 'string' } }
+    } };
+
     this.modelApis = {
         jerky: {
             key: 'jerky',
             types: {
+                foo: {
+                    key: 'foo',
+                    singular: 'foo',
+                    plural: 'foos',
+                    classId: 'foo-class-id'
+                },
                 bar: {
                     key: 'bar',
                     singular: 'bar',
                     plural: 'bars',
                     classId: 'bar-class-id'
-                },
-                baz: {
-                    key: 'baz',
-                    singular: 'baz',
-                    plural: 'bazzes',
-                    classId: 'baz-class-id'
                 }
             }
         }
@@ -104,13 +106,13 @@ function _beforeEach() {
             switch (true) {
             case JSON.stringify(args.context) === context
                     && args.objects[0].id === 'some-id':
-                return Promise.resolve({ objects: [ dummyObject ] });
+                return Promise.resolve({ objects: [ self.dummyObject ] });
             case JSON.stringify(args.context) === context
-                    && args.objects[0].id === 'primary-class-id':
-                return Promise.resolve({ objects: [ primaryClass ] });
+                    && args.objects[0].id === 'foo-class-id':
+                return Promise.resolve({ objects: [ self.fooClass ] });
             case JSON.stringify(args.context) === context
-                    && args.objects[0].id === 'secondary-class-id':
-                return Promise.resolve({ objects: [ secondaryClass ] });
+                    && args.objects[0].id === 'bar-class-id':
+                return Promise.resolve({ objects: [ self.barClass ] });
             default:
                 return Promise.reject('invalid args');
             }
@@ -118,7 +120,7 @@ function _beforeEach() {
         query: function(args) {
             if (JSON.stringify(args.context) === context
                 && args.query.relatesTo.class === 'bar-class-id') {
-                return Promise.resolve({ objects: [ dummyObject ] });
+                return Promise.resolve({ objects: [ self.dummyObject ] });
             } else {
                 return Promise.reject('invalid args');
             }
