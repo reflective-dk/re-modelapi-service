@@ -1,0 +1,90 @@
+{
+	"info": {
+		"_postman_id": "d47f1062-b3bc-4266-8a46-6894d6c7e6a1",
+		"name": "Reflective Requests",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Token",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "context",
+						"value": "{\"domain\":\"aau\"}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "client_id=reflective&client_secret=reflective&grant_type=password&username=smad@adm.aau.dk&password=et-gyldigt-password"
+				},
+				"url": {
+					"raw": "https://home.reflective.dk/api/oauth/token",
+					"protocol": "https",
+					"host": [
+						"home",
+						"reflective",
+						"dk"
+					],
+					"path": [
+						"api",
+						"oauth",
+						"token"
+					]
+				},
+				"description": "Get a token from the token service."
+			},
+			"response": []
+		},
+		{
+			"name": "All AAU Units",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Transfer-Encoding",
+						"value": "chunked",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": " Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJyZWZsZWN0aXZlIiwidXNlciI6eyJpZCI6IjI3MWYwMmEzLTBiMTctNWZjNS1iYmY4LTA2ODFhNjViNGQ0YSIsInVzZXJuYW1lIjoic21hZEBhZG0uYWF1LmRrIiwiY29udGV4dCI6eyJkb21haW4iOiJhYXUifX0sInN1YiI6InNtYWRAYWRtLmFhdS5kayIsImFzc2lnbm1lbnRzIjpbXSwiZXhwIjoxNTQwNDkxOTUxLjkxNSwiaWF0IjoxNTQwNDYzMTUxfQ.IWMdDtt1k5ea3DbWYmt-qZms-OEUXIZtQWXmCMVEbp8",
+						"type": "text"
+					},
+					{
+						"key": "context",
+						"value": "{\"domain\":\"aau\"}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://home.reflective.dk/api/model/aau/units",
+					"protocol": "https",
+					"host": [
+						"home",
+						"reflective",
+						"dk"
+					],
+					"path": [
+						"api",
+						"model",
+						"aau",
+						"units"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
