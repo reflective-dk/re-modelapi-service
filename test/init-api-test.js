@@ -45,7 +45,7 @@ describe('API Initialization', function() {
         it('should initialize operation for single instance', function(done) {
             initModelApi(apiSpec, this.initRoute, this.mockApi);
             expect(this.op('foo/bar/:instanceId'))
-                .to.eventually.deep.equal({ status: 200, body: dummyObject })
+                .to.eventually.deep.equal({ status: 200, body: [ dummyObject ] })
                 .notify(done);
         });
 
