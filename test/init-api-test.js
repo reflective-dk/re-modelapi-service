@@ -25,14 +25,14 @@ describe('API Initialization', function() {
         it('should initialize operation for single instance', function(done) {
             initModelApi('jerky', this.modelApis, this.initRoute, this.mockApi);
             expect(this.op('jerky/bar/:instanceId'))
-                .to.eventually.deep.equal({ status: 200, body: [ this.dummyObject ] })
+                .to.eventually.deep.equal({ status: 200, body: [ this.hrefifiedObject ] })
                 .notify(done);
         });
 
         it('should initialize operation for instance collection', function(done) {
             initModelApi('jerky', this.modelApis, this.initRoute, this.mockApi);
             expect(this.op('jerky/bars'))
-                .to.eventually.deep.equal({ status: 200, body: [ this.dummyObject ] })
+                .to.eventually.deep.equal({ status: 200, body: [ this.hrefifiedObject ] })
                 .notify(done);
         });
     });
@@ -50,17 +50,39 @@ function _beforeEach() {
         send: function(result) { self.result = result; }
     };
 
-    this.dummyObject = { id: 'some-id', snapshot: {
-        class: { id: 'foo-class-id' },
-        jazz: 42, funk: { id: 'funky-object' }
-    } };
+    this.dummyObject = {
+        id: 'some-id',
+        snapshot: { class: { id: 'foo-class-id' },
+                    jazz: 42,
+                    funk: { id: 'funky-object' },
+                    rock: { plif: { id: 'rock-object' } }
+                  }
+    };
+
+    this.hrefifiedObject = {
+        id: 'some-id',
+        href: 'jerky/foos/some-id',
+        snapshot: { class: { id: 'foo-class-id' },
+                    jazz: 42,
+                    funk: {
+                        id: 'funky-object',
+                        href: 'jerky/bars/funky-object'
+                    },
+                    rock: { plif: { id: 'rock-object',
+                                    href: 'jerky/bars/rock-object' } }
+                  }
+    };
 
     this.fooClass = { id: 'foo-class-id', snapshot: {
         class: { id: 'class-class-id' },
         properties: {
             jazz: { type: 'simple', dataType: 'string' },
             funk: { type: 'simple', dataType: {
-                type: 'relation', target: { id: 'bar-class-id' } } }
+                type: 'relation', target: { id: 'bar-class-id' } } },
+            rock: { type: 'map', dataType: {
+                type: 'relation', target: { id: 'bar-class-id' } } },
+            pop: { type: 'map', dataType: {
+                type: 'relation', target: { id: 'foo-class-id' } } }
         }
     } };
 
@@ -106,13 +128,19 @@ function _beforeEach() {
             switch (true) {
             case JSON.stringify(args.context) === context
                     && args.objects[0].id === 'some-id':
-                return Promise.resolve({ objects: [ self.dummyObject ] });
+                return Promise.resolve({ objects: [
+                    JSON.parse(JSON.stringify(self.dummyObject))
+                ] });
             case JSON.stringify(args.context) === context
                     && args.objects[0].id === 'foo-class-id':
-                return Promise.resolve({ objects: [ self.fooClass ] });
+                return Promise.resolve({ objects: [
+                    JSON.parse(JSON.stringify(self.fooClass))
+                ] });
             case JSON.stringify(args.context) === context
                     && args.objects[0].id === 'bar-class-id':
-                return Promise.resolve({ objects: [ self.barClass ] });
+                return Promise.resolve({ objects: [
+                    JSON.parse(JSON.stringify(self.barClass))
+                ] });
             default:
                 return Promise.reject('invalid args');
             }
