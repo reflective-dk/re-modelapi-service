@@ -6,6 +6,8 @@ chai.use(require('chai-as-promised'));
 var expect = chai.expect;
 var uuid = require('uuid');
 
+var models = require('re-models').model;
+
 var initModelApi = require('../lib/init-model-api');
 
 var context = '{"domain":"dummy-context"}';
@@ -73,13 +75,20 @@ function _beforeEach() {
                   }
     };
 
+    this.motherFooClass = { id: 'mother-foo-class-id', snapshot: {
+        class: { id: 'class-class-id' },
+        properties: {
+            rock: { type: 'map', dataType: {
+                type: 'relation', target: { id: 'bar-class-id' } } }
+        }
+    } };
+
     this.fooClass = { id: 'foo-class-id', snapshot: {
         class: { id: 'class-class-id' },
+        extends: { id: this.motherFooClass.id },
         properties: {
             jazz: { type: 'simple', dataType: 'string' },
             funk: { type: 'simple', dataType: {
-                type: 'relation', target: { id: 'bar-class-id' } } },
-            rock: { type: 'map', dataType: {
                 type: 'relation', target: { id: 'bar-class-id' } } },
             pop: { type: 'map', dataType: {
                 type: 'relation', target: { id: 'foo-class-id' } } }
@@ -128,28 +137,27 @@ function _beforeEach() {
             switch (true) {
             case JSON.stringify(args.context) === context
                     && args.objects[0].id === 'some-id':
-                return Promise.resolve({ objects: [
-                    JSON.parse(JSON.stringify(self.dummyObject))
-                ] });
-            case JSON.stringify(args.context) === context
-                    && args.objects[0].id === 'foo-class-id':
-                return Promise.resolve({ objects: [
-                    JSON.parse(JSON.stringify(self.fooClass))
-                ] });
-            case JSON.stringify(args.context) === context
-                    && args.objects[0].id === 'bar-class-id':
-                return Promise.resolve({ objects: [
-                    JSON.parse(JSON.stringify(self.barClass))
-                ] });
+                return Promise.resolve({
+                    objects: JSON.parse(JSON.stringify([ self.dummyObject ]))
+                });
             default:
                 return Promise.reject('invalid args');
             }
         },
         query: function(args) {
-            if (JSON.stringify(args.context) === context
-                && args.query.relatesTo.class === 'bar-class-id') {
-                return Promise.resolve({ objects: [ self.dummyObject ] });
-            } else {
+            switch (true) {
+            case JSON.stringify(args.context) === context
+                    && args.query.relatesTo.class === 'bar-class-id':
+                return Promise.resolve({
+                    objects: JSON.parse(JSON.stringify([ self.dummyObject ])) });
+            case JSON.stringify(args.context) === context
+                    && args.query.relatesTo.class === models.metamodel.classes.class.id:
+                return Promise.resolve({
+                    objects: JSON.parse(JSON.stringify([
+                        self.fooClass, self.barClass, self.motherFooClass
+                    ]))
+                });
+            default:
                 return Promise.reject('invalid args');
             }
         }
