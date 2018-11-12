@@ -27,6 +27,7 @@
   "dependencies": {
     "bluebird": "^3.5.0",
     "bunyan": "^1.8.12",
+    "chai-iso8601": "^1.0.0",
     "express": "^4.16.2",
     "pumpify": "^1.4.0",
     "re-auth": "git+ssh://git@github.com/reflective-dk/re-auth.git",

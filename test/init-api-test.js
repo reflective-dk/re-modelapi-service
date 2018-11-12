@@ -135,8 +135,7 @@ function _beforeEach() {
     this.mockApi = { promise: { index: {
         snapshot: function(args) {
             switch (true) {
-            case JSON.stringify(args.context) === context
-                    && args.objects[0].id === 'some-id':
+            case args.objects[0].id === 'some-id':
                 return Promise.resolve({
                     objects: JSON.parse(JSON.stringify([ self.dummyObject ]))
                 });
@@ -146,12 +145,10 @@ function _beforeEach() {
         },
         query: function(args) {
             switch (true) {
-            case JSON.stringify(args.context) === context
-                    && args.query.relatesTo.class === 'bar-class-id':
+            case args.query.relatesTo.class === 'bar-class-id':
                 return Promise.resolve({
                     objects: JSON.parse(JSON.stringify([ self.dummyObject ])) });
-            case JSON.stringify(args.context) === context
-                    && args.query.relatesTo.class === models.metamodel.classes.class.id:
+            case args.query.relatesTo.class === models.metamodel.classes.class.id:
                 return Promise.resolve({
                     objects: JSON.parse(JSON.stringify([
                         self.fooClass, self.barClass, self.motherFooClass

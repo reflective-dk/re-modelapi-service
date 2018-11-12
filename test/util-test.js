@@ -1,6 +1,7 @@
 "use strict";
 
 var chai = require('chai');
+chai.use(require('chai-iso8601')());
 chai.use(require('chai-as-promised'));
 var expect = chai.expect;
 var util = require('../lib/util');
@@ -25,7 +26,7 @@ describe('Util', function() {
                 .notify(done);
         });
 
-        it('should accept context with validOn parameter', function(done) {
+        it('should accept context with just validTo parameter', function(done) {
             expect(util.resolveValidityParameters({ validTo: now }))
                 .to.eventually.deep.equal({ validFrom: beginning, validTo: now })
                 .notify(done);
@@ -34,6 +35,15 @@ describe('Util', function() {
         it('should accept context with validFrom and validTo parameters', function(done) {
             expect(util.resolveValidityParameters({ validFrom: now, validTo: later }))
                 .to.eventually.deep.equal({ validFrom: now, validTo: later })
+                .notify(done);
+        });
+
+        it('should accept context with no validity parameters and default to validOn=\'now\'', function(done) {
+            expect(util.resolveValidityParameters({}))
+                .to.eventually.have.property('validOn')
+                .that.is.a('string')
+                // Should work! (promise problem)
+                // .that.is.iso8601('eq', now, 1000) // Within one second
                 .notify(done);
         });
 
