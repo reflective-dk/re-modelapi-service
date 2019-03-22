@@ -110,6 +110,90 @@ describe('Perspectives', function() {
             })).to.eventually.deep.equal(expected).notify(done);
         });
     });
+
+    describe('employees', function() {
+        var expected = [
+            { Id: 'ansaettelse2',
+	      EksterntId: '36',
+	      Navn: 'Ansættelse 36',
+	      EnhedId: 'id-50128',
+	      EnhedEksterntId: '50128',
+	      EnhedNavn: 'Plaf',
+              Brugere: 'kai',
+              CprNummer: '0303030303',
+              Telefon: '23232323',
+              Email: 'someone@somewhere.com',
+              StillingEksterntId: '12',
+              StillingId: 'teamleder',
+              StillingNavn: 'Teamleder' },
+            { Id: 'ansaettelse',
+	      EksterntId: '35',
+	      Navn: 'Ansættelse 35',
+	      EnhedId: 'id-50150',
+	      EnhedEksterntId: '50150',
+	      EnhedNavn: 'Plif',
+              StiFraRod: 'Plaf',
+              Brugere: 'vai',
+              CprNummer: '0101010101',
+              Telefon: '23232323',
+              Email: 'someone@somewhere.com',
+              StillingEksterntId: '11',
+              StillingId: 'sektionsleder',
+              StillingNavn: 'Sektionsleder' }
+        ];
+
+        it('should return expected result', function(done) {
+            var perspectives = this.perspectives;
+            expect(new Promise(function(resolve) {
+                perspectives.employees(request, {
+                    send: function(body) {
+                        resolve({ status: 200, body: JSON.parse(JSON.stringify(body)) });
+                    },
+                    set: function() {},
+                    format: function(handlers) {
+                        return handlers.default();
+                    }
+                }, next);
+            })).to.eventually.deep.equal({
+                status: 200,
+                body: expected
+            }).notify(done);
+        });
+
+        it('should return convert to CSV if requested', function(done) {
+            var perspectives = this.perspectives;
+            expect(new Promise(function(resolve) {
+                perspectives.employees(request, {
+                    send: function(body) {
+                        resolve({ status: 200, body: JSON.parse(JSON.stringify(body)) });
+                    },
+                    set: function() {},
+                    format: function(handlers) {
+                        return handlers['text/csv']();
+                    }
+                }, next);
+            }).then(function(response) {
+                return converter.csv2jsonAsync(response.body, {
+                    delimiter: { field: ';', array: null }
+                });
+            }).then(function(objects) {
+                return objects.map(function(o) {
+                    var onew = {};
+                    Object.keys(o)
+                        .filter(k => o[k] != undefined)
+                        .forEach(function(k) {
+                            if (o[k] === ';' || o[k] === '' || o[k] == undefined) {
+                                return;
+                            }
+                            onew[k] = o[k].toString();
+                            onew[k] = onew[k][onew[k].length-1] == ';'
+                                ? onew[k].substring(0, onew[k].length-1) : onew[k];
+                        });
+                    return onew;
+                });
+            })).to.eventually.deep.equal(expected).notify(done);
+        });
+    });
 });
 
 function _before() {
@@ -120,6 +204,10 @@ function _before() {
                 case models.ro.classes.unit.id:
                     return Promise.resolve({ objects: [
                         mockObject('id-50150'), mockObject('id-50128'), mockObject('id-50129-old')
+                    ] });
+                case models.ro.classes.employment.id:
+                    return Promise.resolve({ objects: [
+                        mockObject('ansaettelse'), mockObject('ansaettelse2')
                     ] });
                 case models.entity.classes.hierarchy.id:
                     return Promise.resolve({ objects: [
@@ -181,6 +269,12 @@ function _before() {
                         mockObject(object.snapshot.employment.id);
                 });
                 return Promise.resolve(objects);
+            case '"snapshot.employedAt"':
+                objects.forEach(function(object) {
+                    object.snapshot.employedAt =
+                        mockObject(object.snapshot.employedAt.id);
+                });
+                return Promise.resolve(objects);
             case '"snapshot.propagateFrom"':
                 objects.forEach(function(object) {
                     object.snapshot.propagateFrom =
@@ -205,6 +299,16 @@ function _before() {
                 objects.forEach(function(object) {
                     object.snapshot.employment.snapshot.position =
                         mockObject(object.snapshot.employment.snapshot.position.id);
+                });
+                return Promise.resolve(objects);
+            case '"snapshot.position"':
+                objects.forEach(function(object) {
+                    object.snapshot.position = mockObject(object.snapshot.position.id);
+                });
+                return Promise.resolve(objects);
+            case '"snapshot.employee"':
+                objects.forEach(function(object) {
+                    object.snapshot.employee = mockObject(object.snapshot.employee.id);
                 });
                 return Promise.resolve(objects);
             case '["snapshot.employment","snapshot.employee"]':
@@ -432,22 +536,33 @@ function mockObject(id) {
         return {
             id: 'ansaettelse',
             snapshot: {
+                name: 'Ansættelse 35',
                 employee: { id: 'larslarsen' },
-                position: { id: 'sektionsleder' }
+                position: { id: 'sektionsleder' },
+                employedAt: { id: 'id-50150' },
+                phoneNumbers: { some: '23232323' },
+                emailAddresses: { some: 'someone@somewhere.com' },
+                foreignIds: { opusId: '35' }
             }
         };
     case 'ansaettelse2':
         return {
             id: 'ansaettelse2',
             snapshot: {
+                name: 'Ansættelse 36',
                 employee: { id: 'svendsvendsen' },
-                position: { id: 'teamleder' }
+                position: { id: 'teamleder' },
+                employedAt: { id: 'id-50128' },
+                phoneNumbers: { some: '23232323' },
+                emailAddresses: { some: 'someone@somewhere.com' },
+                foreignIds: { opusId: '36' }
             }
         };
     case 'user-account':
         return {
             id: 'user-account',
             snapshot: {
+                username: 'vai',
                 employments: { ansaettelse: { id: 'ansaettelse' } },
                 foreignIds: { aauId: '3001', staffId: '1001' }
             }
@@ -456,6 +571,7 @@ function mockObject(id) {
         return {
             id: 'user-account2',
             snapshot: {
+                username: 'kai',
                 employments: { ansaettelse: { id: 'ansaettelse2' } },
                 foreignIds: { aauId: '3002', staffId: '1002' }
             }
@@ -464,14 +580,16 @@ function mockObject(id) {
         return {
             id: 'sektionsleder',
             snapshot: {
-                name: 'Sektionsleder'
+                name: 'Sektionsleder',
+                foreignIds: { opusId: '11' }
             }
         };
     case 'teamleder':
         return {
             id: 'teamleder',
             snapshot: {
-                name: 'Teamleder'
+                name: 'Teamleder',
+                foreignIds: { opusId: '12' }
             }
         };
     case 'larslarsen':
