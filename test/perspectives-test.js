@@ -18,54 +18,96 @@ describe('Perspectives', function() {
     before(_before);
 
     describe('units', function() {
+        var expected = [
+            { Id: 'id-50128',
+	      EksterntId: '50128',
+	      Navn: 'Plaf',
+	      KortNavn: 'PLAF',
+	      EnhedstypeId: 'afdeling',
+	      EnhedstypeEksterntId: '22',
+	      EnhedstypeNavn: 'Afdeling',
+	      Telefon: '23456789',
+	      Email: 'plaf@thisted.dk',
+	      SENummer: '77777777',
+	      EanNummer: '0123456789012',
+	      Omkostningssteder: '4444',
+	      Adresse: 'Skolegade 15',
+	      Postnummer: '7700',
+	      By: 'Thisted',
+	      Land: 'Danmark',
+	      AktivFra: '01-01-2010' },
+            { Id: 'id-50150',
+	      EksterntId: '50150',
+	      Navn: 'Plif',
+	      OverordnetId: 'id-50128',
+	      OverordnetEksterntId: '50128',
+	      OverordnetNavn: 'Plaf',
+              StiFraRod: 'Plaf',
+	      KortNavn: 'PLIF',
+	      EnhedstypeId: 'sektion',
+	      EnhedstypeEksterntId: '23',
+	      EnhedstypeNavn: 'Sektion',
+	      Telefon: '23456789',
+	      Email: 'plif@thisted.dk',
+	      SENummer: '77777777',
+	      EanNummer: '0123456789012',
+	      Omkostningssteder: '3333',
+	      Adresse: 'Skolegade 15',
+	      Postnummer: '7700',
+	      By: 'Thisted',
+	      Land: 'Danmark' }
+        ];
+
         it('should return expected result', function(done) {
             var perspectives = this.perspectives;
             expect(new Promise(function(resolve) {
-                perspectives.units(request, { send: function(body) {
-                    resolve({ status: 200, body: JSON.parse(JSON.stringify(body)) });
-                } }, next);
+                perspectives.units(request, {
+                    send: function(body) {
+                        resolve({ status: 200, body: JSON.parse(JSON.stringify(body)) });
+                    },
+                    set: function() {},
+                    format: function(handlers) {
+                        return handlers.default();
+                    }
+                }, next);
             })).to.eventually.deep.equal({
                 status: 200,
-                body: [
-                    { Id: 'id-50128',
-	              EksterntId: '50128',
-	              Navn: 'Plaf',
-	              KortNavn: 'PLAF',
-	              EnhedstypeId: 'afdeling',
-	              EnhedstypeEksterntId: '22',
-	              EnhedstypeNavn: 'Afdeling',
-	              Telefon: '23456789',
-	              Email: 'plaf@thisted.dk',
-	              SENummer: '77777777',
-	              EanNummer: '0123456789012',
-	              Omkostningssteder: '4444',
-	              Adresse: 'Skolegade 15',
-	              Postnummer: '7700',
-	              By: 'Thisted',
-	              Land: 'Danmark',
-	              AktivFra: '01-01-2010' },
-                    { Id: 'id-50150',
-	              EksterntId: '50150',
-	              Navn: 'Plif',
-	              OverordnetId: 'id-50128',
-	              OverordnetEksterntId: '50128',
-	              OverordnetNavn: 'Plaf',
-                      StiFraRod: 'Plaf',
-	              KortNavn: 'PLIF',
-	              EnhedstypeId: 'sektion',
-	              EnhedstypeEksterntId: '23',
-	              EnhedstypeNavn: 'Sektion',
-	              Telefon: '23456789',
-	              Email: 'plif@thisted.dk',
-	              SENummer: '77777777',
-	              EanNummer: '0123456789012',
-	              Omkostningssteder: '3333',
-	              Adresse: 'Skolegade 15',
-	              Postnummer: '7700',
-	              By: 'Thisted',
-	              Land: 'Danmark' }
-                ]
+                body: expected
             }).notify(done);
+        });
+
+        it('should return convert to CSV if requested', function(done) {
+            var perspectives = this.perspectives;
+            expect(new Promise(function(resolve) {
+                perspectives.units(request, {
+                    send: function(body) {
+                        resolve({ status: 200, body: JSON.parse(JSON.stringify(body)) });
+                    },
+                    set: function() {},
+                    format: function(handlers) {
+                        return handlers['text/csv']();
+                    }
+                }, next);
+            }).then(function(response) {
+                return converter.csv2jsonAsync(response.body, {
+                    delimiter: { field: ';', array: null }
+                });
+            }).then(function(objects) {
+                return objects.map(function(o) {
+                    var onew = {};
+                    Object.keys(o)
+                        .filter(k => o[k] != undefined)
+                        .forEach(function(k) {
+                            if (o[k] === ';' || o[k] === '' || o[k] == undefined) {
+                                return;
+                            }
+                            onew[k] = o[k].toString();
+                            onew[k] = onew[k][onew[k].length-1] == ';'
+                                ? onew[k].substring(0, onew[k].length-1) : onew[k];
+                        });
+                    return onew;
+                });
+            })).to.eventually.deep.equal(expected).notify(done);
         });
     });
 });
