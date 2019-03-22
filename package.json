@@ -29,6 +29,8 @@
     "bunyan": "^1.8.12",
     "chai-iso8601": "^1.0.0",
     "express": "^4.16.2",
+    "json-2-csv": "^3.4.1",
+    "moment": "^2.24.0",
     "pumpify": "^1.4.0",
     "re-auth": "git+ssh://git@github.com/reflective-dk/re-auth.git",
     "re-models": "git+ssh://git@github.com/reflective-dk/re-models.git",
