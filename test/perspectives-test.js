@@ -115,7 +115,7 @@ describe('Perspectives', function() {
         var expected = [
             { Id: 'ansaettelse2',
 	      EksterntId: '36',
-	      Navn: 'Ansættelse 36',
+	      Navn: 'Svend Svendsen',
 	      EnhedId: 'id-50128',
 	      EnhedEksterntId: '50128',
 	      EnhedNavn: 'Plaf',
@@ -128,7 +128,7 @@ describe('Perspectives', function() {
               StillingNavn: 'Teamleder' },
             { Id: 'ansaettelse',
 	      EksterntId: '35',
-	      Navn: 'Ansættelse 35',
+	      Navn: 'Lars Larsen',
 	      EnhedId: 'id-50150',
 	      EnhedEksterntId: '50150',
 	      EnhedNavn: 'Plif',
@@ -164,6 +164,92 @@ describe('Perspectives', function() {
             var perspectives = this.perspectives;
             expect(new Promise(function(resolve) {
                 perspectives.employees(request, {
+                    send: function(body) {
+                        resolve({ status: 200, body: JSON.parse(JSON.stringify(body)) });
+                    },
+                    set: function() {},
+                    format: function(handlers) {
+                        return handlers['text/csv']();
+                    }
+                }, next);
+            }).then(function(response) {
+                return converter.csv2jsonAsync(response.body, {
+                    delimiter: { field: ';', array: null }
+                });
+            }).then(function(objects) {
+                return objects.map(function(o) {
+                    var onew = {};
+                    Object.keys(o)
+                        .filter(k => o[k] != undefined)
+                        .forEach(function(k) {
+                            if (o[k] === ';' || o[k] === '' || o[k] == undefined) {
+                                return;
+                            }
+                            onew[k] = o[k].toString();
+                            onew[k] = onew[k][onew[k].length-1] == ';'
+                                ? onew[k].substring(0, onew[k].length-1) : onew[k];
+                        });
+                    return onew;
+                });
+            })).to.eventually.deep.equal(expected).notify(done);
+        });
+    });
+
+    describe('roleAssignments', function() {
+        var expected = [
+            { Id: 'ledertildeling',
+              MedarbejderId: 'ansaettelse',
+              MedarbejderEksterntId: '35',
+              MedarbejderNavn: 'Lars Larsen',
+	      EnhedId: 'id-50128',
+	      EnhedEksterntId: '50128',
+	      EnhedNavn: 'Plaf',
+              RolleId: 'leder',
+              RolleEksterntId: '8',
+              RolleNavn: 'Leder',
+              Brugere: 'vai',
+              Telefon: '23232323',
+              Email: 'someone@somewhere.com',
+              Ansvar: 'Foo Responsibility, Bar Responsibility' },
+            { Id: 'altmuligmandtildeling',
+              MedarbejderId: 'ansaettelse2',
+              MedarbejderEksterntId: '36',
+              MedarbejderNavn: 'Svend Svendsen',
+	      EnhedId: 'id-50150',
+	      EnhedEksterntId: '50150',
+	      EnhedNavn: 'Plif',
+              RolleId: 'altmuligmand',
+              RolleEksterntId: '9',
+              RolleNavn: 'Altmuligmand',
+              StiFraRod: 'Plaf',
+              Brugere: 'kai',
+              Telefon: '23232323',
+              Email: 'someone@somewhere.com',
+              Ansvar: 'Foo Responsibility, Bar Responsibility' }
+        ];
+
+        it('should return expected result', function(done) {
+            var perspectives = this.perspectives;
+            expect(new Promise(function(resolve) {
+                perspectives.roleAssignments(request, {
+                    send: function(body) {
+                        resolve({ status: 200, body: JSON.parse(JSON.stringify(body)) });
+                    },
+                    set: function() {},
+                    format: function(handlers) {
+                        return handlers.default();
+                    }
+                }, next);
+            })).to.eventually.deep.equal({
+                status: 200,
+                body: expected
+            }).notify(done);
+        });
+
+        it('should return convert to CSV if requested', function(done) {
+            var perspectives = this.perspectives;
+            expect(new Promise(function(resolve) {
+                perspectives.roleAssignments(request, {
                     send: function(body) {
                         resolve({ status: 200, body: JSON.parse(JSON.stringify(body)) });
                     },
@@ -287,11 +373,11 @@ function _before() {
                         mockObject(object.snapshot.role.id);
                 });
                 return Promise.resolve(objects);
-            case '["snapshot.role","snapshot.responsibilities"]':
+            case '"snapshot.responsibilities"':
                 objects.forEach(function(object) {
-                    object.snapshot.role.snapshot.responsibilities = [
-                        mockObject(object.snapshot.role.snapshot.responsibilities.fooRes.id),
-                        mockObject(object.snapshot.role.snapshot.responsibilities.barRes.id)
+                    object.snapshot.responsibilities = [
+                        mockObject(object.snapshot.responsibilities.fooRes.id),
+                        mockObject(object.snapshot.responsibilities.barRes.id)
                     ];
                 });
                 return Promise.resolve(objects);
@@ -477,7 +563,11 @@ function mockObject(id) {
                 class: models.ro.classes['role-assignment'].ref,
                 role: { id: 'leder' },
                 employment: { id: 'ansaettelse' },
-                propagateFrom: { id: 'id-50128' }
+                propagateFrom: { id: 'id-50128' },
+                responsibilities: {
+                    fooRes: { id: 'foo-res' },
+                    barRes: { id: 'bar-res' }
+                }
             }
         };
     case 'leder':
@@ -489,7 +579,7 @@ function mockObject(id) {
                 responsibilities: {
                     fooRes: { id: 'foo-res' },
                     barRes: { id: 'bar-res' },
-                    leder: { id: '' }
+                    lederRes: { id: 'leder-res' }
                 }
             }
         };
@@ -500,7 +590,11 @@ function mockObject(id) {
                 class: models.ro.classes['role-assignment'].ref,
                 role: { id: 'altmuligmand' },
                 employment: { id: 'ansaettelse2' },
-                propagateFrom: { id: 'id-50150' }
+                propagateFrom: { id: 'id-50150' },
+                responsibilities: {
+                    fooRes: { id: 'foo-res' },
+                    barRes: { id: 'bar-res' }
+                }
             }
         };
     case 'altmuligmand':
@@ -596,7 +690,7 @@ function mockObject(id) {
         return {
             id: 'larslarsen',
             snapshot: {
-                name: '123345456',
+                name: 'Lars Larsen',
                 givenName: 'Lars',
                 familyName: 'Larsen',
                 cprNr: '0101010101'
@@ -606,7 +700,7 @@ function mockObject(id) {
         return {
             id: 'svendsvendsen',
             snapshot: {
-                name: '123345459',
+                name: 'Svend Svendsen',
                 givenName: 'Svend',
                 familyName: 'Svendsen',
                 cprNr: '0303030303'
