@@ -1,5 +1,6 @@
 "use strict";
 
+var _ = require('lodash');
 var Promise = require('bluebird');
 var chai = require('chai');
 chai.use(require('chai-as-promised'));
@@ -280,6 +281,88 @@ describe('Perspectives', function() {
             })).to.eventually.deep.equal(expected).notify(done);
         });
     });
+
+    describe('userAccounts', function() {
+        var expected = [
+            { Id: 'user-account2',
+              EksterntId: '1002, 3002',
+              MedarbejderId: 'ansaettelse2',
+              MedarbejderEksterntId: '36',
+              MedarbejderNavn: 'Svend Svendsen',
+	      EnhedId: 'id-50128',
+	      EnhedEksterntId: '50128',
+	      EnhedNavn: 'Plaf',
+              Brugernavn: 'kai',
+              Email: 'someone@somewhere.com',
+              SystemId: 'system-1',
+              SystemNavn: 'System 1' },
+            { Id: 'user-account',
+              EksterntId: '1001, 3001',
+              MedarbejderId: 'ansaettelse',
+              MedarbejderEksterntId: '35',
+              MedarbejderNavn: 'Lars Larsen',
+	      EnhedId: 'id-50150',
+	      EnhedEksterntId: '50150',
+	      EnhedNavn: 'Plif',
+              StiFraRod: 'Plaf',
+              Brugernavn: 'vai',
+              Email: 'someone@somewhere.com',
+              SystemId: 'system-1',
+              SystemNavn: 'System 1' }
+        ];
+
+        it('should return expected result', function(done) {
+            var perspectives = this.perspectives;
+            expect(new Promise(function(resolve) {
+                perspectives.userAccounts(request, {
+                    send: function(body) {
+                        resolve({ status: 200, body: JSON.parse(JSON.stringify(body)) });
+                    },
+                    set: function() {},
+                    format: function(handlers) {
+                        return handlers.default();
+                    }
+                }, next);
+            })).to.eventually.deep.equal({
+                status: 200,
+                body: expected
+            }).notify(done);
+        });
+
+        it('should return convert to CSV if requested', function(done) {
+            var perspectives = this.perspectives;
+            expect(new Promise(function(resolve) {
+                perspectives.userAccounts(request, {
+                    send: function(body) {
+                        resolve({ status: 200, body: JSON.parse(JSON.stringify(body)) });
+                    },
+                    set: function() {},
+                    format: function(handlers) {
+                        return handlers['text/csv']();
+                    }
+                }, next);
+            }).then(function(response) {
+                return converter.csv2jsonAsync(response.body, {
+                    delimiter: { field: ';', array: null }
+                });
+            }).then(function(objects) {
+                return objects.map(function(o) {
+                    var onew = {};
+                    Object.keys(o)
+                        .filter(k => o[k] != undefined)
+                        .forEach(function(k) {
+                            if (o[k] === ';' || o[k] === '' || o[k] == undefined) {
+                                return;
+                            }
+                            onew[k] = o[k].toString();
+                            onew[k] = onew[k][onew[k].length-1] == ';'
+                                ? onew[k].substring(0, onew[k].length-1) : onew[k];
+                        });
+                    return onew;
+                });
+            })).to.eventually.deep.equal(expected).notify(done);
+        });
+    });
 });
 
 function _before() {
@@ -303,6 +386,11 @@ function _before() {
                     return Promise.resolve({ objects: [
                         mockObject('ledertildeling'),
                         mockObject('altmuligmandtildeling')
+                    ] });
+                case models.ro.classes['user-account'].id:
+                    return Promise.resolve({ objects: [
+                        mockObject('user-account'),
+                        mockObject('user-account2')
                     ] });
                 default:
                     throw new Error('invalid class: ' + args.query.relatesTo.class);
@@ -373,11 +461,24 @@ function _before() {
                         mockObject(object.snapshot.role.id);
                 });
                 return Promise.resolve(objects);
+            case '"snapshot.system"':
+                objects.forEach(function(object) {
+                    object.snapshot.system =
+                        mockObject(object.snapshot.system.id);
+                });
+                return Promise.resolve(objects);
             case '"snapshot.responsibilities"':
                 objects.forEach(function(object) {
                     object.snapshot.responsibilities = [
                         mockObject(object.snapshot.responsibilities.fooRes.id),
                         mockObject(object.snapshot.responsibilities.barRes.id)
+                    ];
+                });
+                return Promise.resolve(objects);
+            case '"snapshot.employments"':
+                objects.forEach(function(object) {
+                    object.snapshot.employments = [
+                        mockObject(_.find(object.snapshot.employments).id)
                     ];
                 });
                 return Promise.resolve(objects);
@@ -401,6 +502,20 @@ function _before() {
                 objects.forEach(function(object) {
                     object.snapshot.employment.snapshot.employee =
                         mockObject(object.snapshot.employment.snapshot.employee.id);
+                });
+                return Promise.resolve(objects);
+            case '["snapshot.employments","snapshot.employee"]':
+                objects.forEach(function(object) {
+                    var employment = _.find(object.snapshot.employments);
+                    employment.snapshot.employee =
+                        mockObject(employment.snapshot.employee.id);
+                });
+                return Promise.resolve(objects);
+            case '["snapshot.employments","snapshot.employedAt"]':
+                objects.forEach(function(object) {
+                    var employment = _.find(object.snapshot.employments);
+                    employment.snapshot.employedAt =
+                        mockObject(employment.snapshot.employedAt.id);
                 });
                 return Promise.resolve(objects);
             case '"snapshot.assignments"':
@@ -658,7 +773,8 @@ function mockObject(id) {
             snapshot: {
                 username: 'vai',
                 employments: { ansaettelse: { id: 'ansaettelse' } },
-                foreignIds: { aauId: '3001', staffId: '1001' }
+                foreignIds: { aauId: '3001', staffId: '1001' },
+                system: { id: 'system-1' }
             }
         };
     case 'user-account2':
@@ -667,7 +783,15 @@ function mockObject(id) {
             snapshot: {
                 username: 'kai',
                 employments: { ansaettelse: { id: 'ansaettelse2' } },
-                foreignIds: { aauId: '3002', staffId: '1002' }
+                foreignIds: { aauId: '3002', staffId: '1002' },
+                system: { id: 'system-1' }
+            }
+        };
+    case 'system-1':
+        return {
+            id: 'system-1',
+            snapshot: {
+                name: 'System 1'
             }
         };
     case 'sektionsleder':
