@@ -53,7 +53,7 @@ describe('Perspectives', function() {
 	      SENummer: '77777777',
 	      EanNummer: '0123456789012',
 	      Omkostningssteder: '3333',
-	      Adresse: 'Skolegade 15',
+	      Adresse: 'Skolegade 20',
 	      Postnummer: '7700',
 	      By: 'Thisted',
 	      Land: 'Danmark' }
@@ -363,6 +363,83 @@ describe('Perspectives', function() {
             })).to.eventually.deep.equal(expected).notify(done);
         });
     });
+
+    describe('locations', function() {
+        var expected = [
+            { Id: 'foo-location',
+	      Navn: 'Foo Location',
+	      EnhedId: 'id-50128',
+	      EnhedEksterntId: '50128',
+	      EnhedNavn: 'Plaf',
+	      Adresse: 'Skolegade 15',
+              PNummer: '1017491802',
+	      Postnummer: '7700',
+	      By: 'Thisted',
+	      Land: 'Danmark' },
+            { Id: 'bar-location',
+	      Navn: 'Bar Location',
+	      EnhedId: 'id-50150',
+	      EnhedEksterntId: '50150',
+	      EnhedNavn: 'Plif',
+	      Adresse: 'Skolegade 20',
+              PNummer: '1017491777',
+	      Postnummer: '7700',
+	      By: 'Thisted',
+	      Land: 'Danmark' },
+        ];
+
+        it('should return expected result', function(done) {
+            var perspectives = this.perspectives;
+            expect(new Promise(function(resolve) {
+                perspectives.locations(request, {
+                    send: function(body) {
+                        resolve({ status: 200, body: JSON.parse(JSON.stringify(body)) });
+                    },
+                    set: function() {},
+                    format: function(handlers) {
+                        return handlers.default();
+                    }
+                }, next);
+            })).to.eventually.deep.equal({
+                status: 200,
+                body: expected
+            }).notify(done);
+        });
+
+        it('should return convert to CSV if requested', function(done) {
+            var perspectives = this.perspectives;
+            expect(new Promise(function(resolve) {
+                perspectives.locations(request, {
+                    send: function(body) {
+                        resolve({ status: 200, body: JSON.parse(JSON.stringify(body)) });
+                    },
+                    set: function() {},
+                    format: function(handlers) {
+                        return handlers['text/csv']();
+                    }
+                }, next);
+            }).then(function(response) {
+                return converter.csv2jsonAsync(response.body, {
+                    delimiter: { field: ';', array: null }
+                });
+            }).then(function(objects) {
+                return objects.map(function(o) {
+                    var onew = {};
+                    Object.keys(o)
+                        .filter(k => o[k] != undefined)
+                        .forEach(function(k) {
+                            if (o[k] === ';' || o[k] === '' || o[k] == undefined) {
+                                return;
+                            }
+                            onew[k] = o[k].toString();
+                            onew[k] = onew[k][onew[k].length-1] == ';'
+                                ? onew[k].substring(0, onew[k].length-1) : onew[k];
+                        });
+                    return onew;
+                });
+            })).to.eventually.deep.equal(expected).notify(done);
+        });
+    });
 });
 
 function _before() {
@@ -392,6 +469,11 @@ function _before() {
                         mockObject('user-account'),
                         mockObject('user-account2')
                     ] });
+                case models.ro.classes.location.id:
+                    return Promise.resolve({ objects: [
+                        mockObject('foo-location'),
+                        mockObject('bar-location')
+                    ] });
                 default:
                     throw new Error('invalid class: ' + args.query.relatesTo.class);
                 }
@@ -415,8 +497,14 @@ function _before() {
                 return Promise.resolve(objects);
             case '"snapshot.locations"':
                 objects.forEach(function(object) {
-                    object.snapshot.locations.foo =
-                        mockObject(object.snapshot.locations.foo.id);
+                    if(object.snapshot.locations.foo) {
+                        object.snapshot.locations.foo =
+                            mockObject(object.snapshot.locations.foo.id);
+                    }
+                    if(object.snapshot.locations.bar) {
+                        object.snapshot.locations.bar =
+                            mockObject(object.snapshot.locations.bar.id);
+                    }
                 });
                 return Promise.resolve(objects);
             case '"snapshot.organizations"':
@@ -433,8 +521,26 @@ function _before() {
                 return Promise.resolve(objects);
             case '["snapshot.locations","snapshot.address"]':
                 objects.forEach(function(object) {
-                    object.snapshot.locations.foo.snapshot.address =
-                        mockObject(object.snapshot.locations.foo.snapshot.address.id);
+                    if (object.snapshot.locations.foo) {
+                        object.snapshot.locations.foo.snapshot.address =
+                            mockObject(object.snapshot.locations.foo.snapshot.address.id);
+                    }
+                    if (object.snapshot.locations.bar) {
+                        object.snapshot.locations.bar.snapshot.address =
+                            mockObject(object.snapshot.locations.bar.snapshot.address.id);
+                    }
+                });
+                return Promise.resolve(objects);
+            case '"snapshot.address"':
+                objects.forEach(function(object) {
+                    object.snapshot.address =
+                        mockObject(object.snapshot.address.id);
+                });
+                return Promise.resolve(objects);
+            case '"snapshot.units"':
+                objects.forEach(function(object) {
+                    object.snapshot.units = [ object.id === 'foo-location'
+                        ? mockObject('id-50128') : mockObject('id-50150') ];
                 });
                 return Promise.resolve(objects);
             case '"snapshot.employment"':
@@ -564,7 +670,7 @@ function mockObject(id) {
                 foreignIds: { orgUnitId: '50150' },
                 unitType: { id: 'sektion' },
                 costCenters: { pang: '3333' },
-                locations: { foo: { id: 'foo-location' } },
+                locations: { bar: { id: 'bar-location' } },
                 emailAddresses: { klak: 'plif@thisted.dk' },
                 phoneNumbers: { klok: '23456789' },
                 ean: { klik: '0123456789012' },
@@ -666,6 +772,26 @@ function mockObject(id) {
             snapshot: {
                 name: 'Foo Address',
                 streetAddress: 'Skolegade 15',
+                postalCode: '7700',
+                city: 'Thisted',
+                country: 'Danmark'
+            }
+        };
+    case 'bar-location':
+        return {
+            id: 'bar-location',
+            snapshot: {
+                name: 'Bar Location',
+                address: { id: 'bar-address' },
+                pNr: '1017491777'
+            }
+        };
+    case 'bar-address':
+        return {
+            id: 'bar-address',
+            snapshot: {
+                name: 'Bar Address',
+                streetAddress: 'Skolegade 20',
                 postalCode: '7700',
                 city: 'Thisted',
                 country: 'Danmark'
