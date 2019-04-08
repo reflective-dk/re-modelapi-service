@@ -289,6 +289,7 @@ describe('Perspectives', function() {
         var expected = [
             { Id: 'user-account2',
               EksterntId: '1002, 3002',
+              Navn: 'kai',
               MedarbejderId: 'ansaettelse2',
               MedarbejderEksterntId: '36',
               MedarbejderNavn: 'Svend Svendsen',
@@ -302,6 +303,7 @@ describe('Perspectives', function() {
               SystemNavn: 'System 1' },
             { Id: 'user-account',
               EksterntId: '1001, 3001',
+              Navn: 'vai',
               MedarbejderId: 'ansaettelse',
               MedarbejderEksterntId: '35',
               MedarbejderNavn: 'Lars Larsen',
