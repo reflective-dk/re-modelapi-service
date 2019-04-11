@@ -116,7 +116,8 @@ describe('Perspectives', function() {
     describe('employees', function() {
         var expected = [
             { Id: 'ansaettelse2',
-	      EksterntId: '36',
+	      EksterntId: '36, 0036',
+	      Medarbejdernummer: '0036',
 	      Navn: 'Svend Svendsen',
 	      EnhedId: 'id-50128',
 	      EnhedEksterntId: '50128',
@@ -130,7 +131,8 @@ describe('Perspectives', function() {
               StillingId: 'teamleder',
               StillingNavn: 'Teamleder' },
             { Id: 'ansaettelse',
-	      EksterntId: '35',
+	      EksterntId: '35, 0035',
+	      Medarbejdernummer: '0035',
 	      Navn: 'Lars Larsen',
 	      EnhedId: 'id-50150',
 	      EnhedEksterntId: '50150',
@@ -202,7 +204,7 @@ describe('Perspectives', function() {
         var expected = [
             { Id: 'ledertildeling',
               MedarbejderId: 'ansaettelse',
-              MedarbejderEksterntId: '35',
+              MedarbejderEksterntId: '35, 0035',
               MedarbejderNavn: 'Lars Larsen',
 	      EnhedId: 'id-50128',
 	      EnhedEksterntId: '50128',
@@ -217,7 +219,7 @@ describe('Perspectives', function() {
               Ansvar: 'Foo Responsibility, Bar Responsibility' },
             { Id: 'altmuligmandtildeling',
               MedarbejderId: 'ansaettelse2',
-              MedarbejderEksterntId: '36',
+              MedarbejderEksterntId: '36, 0036',
               MedarbejderNavn: 'Svend Svendsen',
 	      EnhedId: 'id-50150',
 	      EnhedEksterntId: '50150',
@@ -291,7 +293,7 @@ describe('Perspectives', function() {
               EksterntId: '1002, 3002',
               Navn: 'kai',
               MedarbejderId: 'ansaettelse2',
-              MedarbejderEksterntId: '36',
+              MedarbejderEksterntId: '36, 0036',
               MedarbejderNavn: 'Svend Svendsen',
 	      EnhedId: 'id-50128',
 	      EnhedEksterntId: '50128',
@@ -305,7 +307,7 @@ describe('Perspectives', function() {
               EksterntId: '1001, 3001',
               Navn: 'vai',
               MedarbejderId: 'ansaettelse',
-              MedarbejderEksterntId: '35',
+              MedarbejderEksterntId: '35, 0035',
               MedarbejderNavn: 'Lars Larsen',
 	      EnhedId: 'id-50150',
 	      EnhedEksterntId: '50150',
@@ -885,7 +887,7 @@ function mockObject(id) {
                 employedAt: { id: 'id-50150' },
                 phoneNumbers: { some: '23232323' },
                 emailAddresses: { some: 'someone@somewhere.com' },
-                foreignIds: { opusId: '35' }
+                foreignIds: { opusId: '35', employeeId: '0035' }
             }
         };
     case 'ansaettelse2':
@@ -898,7 +900,7 @@ function mockObject(id) {
                 employedAt: { id: 'id-50128' },
                 phoneNumbers: { some: '23232323' },
                 emailAddresses: { some: 'someone@somewhere.com' },
-                foreignIds: { opusId: '36' }
+                foreignIds: { opusId: '36', employeeId: '0036' }
             }
         };
     case 'user-account':
