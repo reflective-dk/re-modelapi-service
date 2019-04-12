@@ -9,7 +9,7 @@ var expect = chai.expect;
 var Perspectives = require('../lib/perspectives');
 var util = require('../lib/util');
 var models = require('re-models').model;
-var converter = require('json-2-csv');
+var csvjson = require('csvjson');
 
 var context = { domain: 'thisted' };
 var request = { header: function() { return JSON.stringify(context); } };
@@ -23,13 +23,16 @@ describe('Perspectives', function() {
             { Id: 'id-50128',
 	      EksterntId: '50128',
 	      Navn: 'Plaf',
+	      OverordnetId: '',
+	      OverordnetEksterntId: '',
+	      OverordnetNavn: '',
 	      KortNavn: 'PLAF',
               StiFraRod: 'Plaf',
 	      EnhedstypeId: 'afdeling',
 	      EnhedstypeEksterntId: '22',
 	      EnhedstypeNavn: 'Afdeling',
 	      Telefon: '23456789',
-	      Email: 'plaf@thisted.dk',
+	      'Email thisted.dk': 'plaf@thisted.dk',
 	      SENummer: '77777777',
 	      EanNummer: '0123456789012',
 	      Omkostningssteder: '4444',
@@ -37,7 +40,8 @@ describe('Perspectives', function() {
 	      Postnummer: '7700',
 	      By: 'Thisted',
 	      Land: 'Danmark',
-	      AktivFra: '01-01-2010' },
+	      AktivFra: '01-01-2010',
+	      AktivTil: '' },
             { Id: 'id-50150',
 	      EksterntId: '50150',
 	      Navn: 'Plif',
@@ -50,14 +54,16 @@ describe('Perspectives', function() {
 	      EnhedstypeEksterntId: '23',
 	      EnhedstypeNavn: 'Sektion',
 	      Telefon: '23456789',
-	      Email: 'plif@thisted.dk',
+	      'Email thisted.dk': 'plif@thisted.dk',
 	      SENummer: '77777777',
 	      EanNummer: '0123456789012',
 	      Omkostningssteder: '3333',
 	      Adresse: 'Skolegade 20',
 	      Postnummer: '7700',
 	      By: 'Thisted',
-	      Land: 'Danmark' }
+	      Land: 'Danmark',
+	      AktivFra: '',
+	      AktivTil: '' }
         ];
 
         it('should return expected result', function(done) {
@@ -74,7 +80,7 @@ describe('Perspectives', function() {
                 }, next);
             })).to.eventually.deep.equal({
                 status: 200,
-                body: expected
+                body: expected.map(o => removeBlanks(o))
             }).notify(done);
         });
 
@@ -91,23 +97,8 @@ describe('Perspectives', function() {
                     }
                 }, next);
             }).then(function(response) {
-                return converter.csv2jsonAsync(response.body, {
-                    delimiter: { field: ';', array: null }
-                });
-            }).then(function(objects) {
-                return objects.map(function(o) {
-                    var onew = {};
-                    Object.keys(o)
-                        .filter(k => o[k] != undefined)
-                        .forEach(function(k) {
-                            if (o[k] === ';' || o[k] === '' || o[k] == undefined) {
-                                return;
-                            }
-                            onew[k] = o[k].toString();
-                            onew[k] = onew[k][onew[k].length-1] == ';'
-                                ? onew[k].substring(0, onew[k].length-1) : onew[k];
-                        });
-                    return onew;
+                return csvjson.toObject(response.body, {
+                    delimiter: ';', quote: '"'
                 });
             })).to.eventually.deep.equal(expected).notify(done);
         });
@@ -126,10 +117,13 @@ describe('Perspectives', function() {
               Bruger1: 'kai',
               CprNummer: '0303030303',
               Telefon: '23232323',
-              Email: 'someone@somewhere.com',
+              'Email thisted.dk': 'someone@thisted.dk',
               StillingEksterntId: '12',
               StillingId: 'teamleder',
-              StillingNavn: 'Teamleder' },
+              StillingNavn: 'Teamleder',
+              StillingKortNavn: 'TMLED',
+	      AktivFra: '',
+	      AktivTil: '' },
             { Id: 'ansaettelse',
 	      EksterntId: '35, 0035',
 	      Medarbejdernummer: '0035',
@@ -141,10 +135,13 @@ describe('Perspectives', function() {
               Bruger1: 'vai',
               CprNummer: '0101010101',
               Telefon: '23232323',
-              Email: 'someone@somewhere.com',
+              'Email thisted.dk': 'someone@thisted.dk',
               StillingEksterntId: '11',
               StillingId: 'sektionsleder',
-              StillingNavn: 'Sektionsleder' }
+              StillingNavn: 'Sektionsleder',
+              StillingKortNavn: 'SEKLED',
+	      AktivFra: '',
+	      AktivTil: '' }
         ];
 
         it('should return expected result', function(done) {
@@ -161,7 +158,7 @@ describe('Perspectives', function() {
                 }, next);
             })).to.eventually.deep.equal({
                 status: 200,
-                body: expected
+                body: expected.map(o => removeBlanks(o))
             }).notify(done);
         });
 
@@ -178,23 +175,8 @@ describe('Perspectives', function() {
                     }
                 }, next);
             }).then(function(response) {
-                return converter.csv2jsonAsync(response.body, {
-                    delimiter: { field: ';', array: null }
-                });
-            }).then(function(objects) {
-                return objects.map(function(o) {
-                    var onew = {};
-                    Object.keys(o)
-                        .filter(k => o[k] != undefined)
-                        .forEach(function(k) {
-                            if (o[k] === ';' || o[k] === '' || o[k] == undefined) {
-                                return;
-                            }
-                            onew[k] = o[k].toString();
-                            onew[k] = onew[k][onew[k].length-1] == ';'
-                                ? onew[k].substring(0, onew[k].length-1) : onew[k];
-                        });
-                    return onew;
+                return csvjson.toObject(response.body, {
+                    delimiter: ';', quote: '"'
                 });
             })).to.eventually.deep.equal(expected).notify(done);
         });
@@ -215,8 +197,10 @@ describe('Perspectives', function() {
               RolleNavn: 'Leder',
               Bruger1: 'vai',
               Telefon: '23232323',
-              Email: 'someone@somewhere.com',
-              Ansvar: 'Foo Responsibility, Bar Responsibility' },
+              'Email thisted.dk': 'someone@thisted.dk',
+              Ansvar: 'Foo Responsibility, Bar Responsibility',
+	      AktivFra: '',
+	      AktivTil: '' },
             { Id: 'altmuligmandtildeling',
               MedarbejderId: 'ansaettelse2',
               MedarbejderEksterntId: '36, 0036',
@@ -230,8 +214,10 @@ describe('Perspectives', function() {
               StiFraRod: 'Plaf < Plif',
               Bruger1: 'kai',
               Telefon: '23232323',
-              Email: 'someone@somewhere.com',
-              Ansvar: 'Foo Responsibility, Bar Responsibility' }
+              'Email thisted.dk': 'someone@thisted.dk',
+              Ansvar: 'Foo Responsibility, Bar Responsibility',
+	      AktivFra: '',
+	      AktivTil: '' }
         ];
 
         it('should return expected result', function(done) {
@@ -248,7 +234,7 @@ describe('Perspectives', function() {
                 }, next);
             })).to.eventually.deep.equal({
                 status: 200,
-                body: expected
+                body: expected.map(o => removeBlanks(o))
             }).notify(done);
         });
 
@@ -265,23 +251,8 @@ describe('Perspectives', function() {
                     }
                 }, next);
             }).then(function(response) {
-                return converter.csv2jsonAsync(response.body, {
-                    delimiter: { field: ';', array: null }
-                });
-            }).then(function(objects) {
-                return objects.map(function(o) {
-                    var onew = {};
-                    Object.keys(o)
-                        .filter(k => o[k] != undefined)
-                        .forEach(function(k) {
-                            if (o[k] === ';' || o[k] === '' || o[k] == undefined) {
-                                return;
-                            }
-                            onew[k] = o[k].toString();
-                            onew[k] = onew[k][onew[k].length-1] == ';'
-                                ? onew[k].substring(0, onew[k].length-1) : onew[k];
-                        });
-                    return onew;
+                return csvjson.toObject(response.body, {
+                    delimiter: ';', quote: '"'
                 });
             })).to.eventually.deep.equal(expected).notify(done);
         });
@@ -300,9 +271,13 @@ describe('Perspectives', function() {
 	      EnhedNavn: 'Plaf',
               StiFraRod: 'Plaf',
               Brugernavn: 'kai',
-              Email: 'someone@somewhere.com',
+              'Email thisted.dk': 'someone@thisted.dk',
               SystemId: 'system-1',
-              SystemNavn: 'System 1' },
+              SystemNavn: 'System 1',
+              HomeDirectory: '',
+              HomeDrive: '',
+	      AktivFra: '',
+	      AktivTil: '' },
             { Id: 'user-account',
               EksterntId: '1001, 3001',
               Navn: 'vai',
@@ -314,9 +289,13 @@ describe('Perspectives', function() {
 	      EnhedNavn: 'Plif',
               StiFraRod: 'Plaf < Plif',
               Brugernavn: 'vai',
-              Email: 'someone@somewhere.com',
+              'Email thisted.dk': 'someone@thisted.dk',
               SystemId: 'system-1',
-              SystemNavn: 'System 1' }
+              SystemNavn: 'System 1',
+              HomeDirectory: '',
+              HomeDrive: '',
+	      AktivFra: '',
+	      AktivTil: '' }
         ];
 
         it('should return expected result', function(done) {
@@ -333,7 +312,7 @@ describe('Perspectives', function() {
                 }, next);
             })).to.eventually.deep.equal({
                 status: 200,
-                body: expected
+                body: expected.map(o => removeBlanks(o))
             }).notify(done);
         });
 
@@ -350,23 +329,8 @@ describe('Perspectives', function() {
                     }
                 }, next);
             }).then(function(response) {
-                return converter.csv2jsonAsync(response.body, {
-                    delimiter: { field: ';', array: null }
-                });
-            }).then(function(objects) {
-                return objects.map(function(o) {
-                    var onew = {};
-                    Object.keys(o)
-                        .filter(k => o[k] != undefined)
-                        .forEach(function(k) {
-                            if (o[k] === ';' || o[k] === '' || o[k] == undefined) {
-                                return;
-                            }
-                            onew[k] = o[k].toString();
-                            onew[k] = onew[k][onew[k].length-1] == ';'
-                                ? onew[k].substring(0, onew[k].length-1) : onew[k];
-                        });
-                    return onew;
+                return csvjson.toObject(response.body, {
+                    delimiter: ';', quote: '"'
                 });
             })).to.eventually.deep.equal(expected).notify(done);
         });
@@ -380,22 +344,28 @@ describe('Perspectives', function() {
 	      EnhedEksterntId: '50128',
 	      EnhedNavn: 'Plaf',
               StiFraRod: 'Plaf',
+              Telefon: '32415639',
 	      Adresse: 'Skolegade 15',
               PNummer: '1017491802',
 	      Postnummer: '7700',
 	      By: 'Thisted',
-	      Land: 'Danmark' },
+	      Land: 'Danmark',
+	      AktivFra: '',
+	      AktivTil: '' },
             { Id: 'bar-location',
 	      Navn: 'Bar Location',
 	      EnhedId: 'id-50150',
 	      EnhedEksterntId: '50150',
 	      EnhedNavn: 'Plif',
               StiFraRod: 'Plaf < Plif',
+              Telefon: '32415638',
 	      Adresse: 'Skolegade 20',
               PNummer: '1017491777',
 	      Postnummer: '7700',
 	      By: 'Thisted',
-	      Land: 'Danmark' },
+	      Land: 'Danmark',
+	      AktivFra: '',
+	      AktivTil: '' }
         ];
 
         it('should return expected result', function(done) {
@@ -412,7 +382,7 @@ describe('Perspectives', function() {
                 }, next);
             })).to.eventually.deep.equal({
                 status: 200,
-                body: expected
+                body: expected.map(o => removeBlanks(o))
             }).notify(done);
         });
 
@@ -429,23 +399,8 @@ describe('Perspectives', function() {
                     }
                 }, next);
             }).then(function(response) {
-                return converter.csv2jsonAsync(response.body, {
-                    delimiter: { field: ';', array: null }
-                });
-            }).then(function(objects) {
-                return objects.map(function(o) {
-                    var onew = {};
-                    Object.keys(o)
-                        .filter(k => o[k] != undefined)
-                        .forEach(function(k) {
-                            if (o[k] === ';' || o[k] === '' || o[k] == undefined) {
-                                return;
-                            }
-                            onew[k] = o[k].toString();
-                            onew[k] = onew[k][onew[k].length-1] == ';'
-                                ? onew[k].substring(0, onew[k].length-1) : onew[k];
-                        });
-                    return onew;
+                return csvjson.toObject(response.body, {
+                    delimiter: ';', quote: '"'
                 });
             })).to.eventually.deep.equal(expected).notify(done);
         });
@@ -773,7 +728,8 @@ function mockObject(id) {
             snapshot: {
                 name: 'Foo Location',
                 address: { id: 'foo-address' },
-                pNr: '1017491802'
+                pNr: '1017491802',
+                phoneNumbers: { kalif: '32415639' }
             }
         };
     case 'foo-address':
@@ -793,7 +749,8 @@ function mockObject(id) {
             snapshot: {
                 name: 'Bar Location',
                 address: { id: 'bar-address' },
-                pNr: '1017491777'
+                pNr: '1017491777',
+                phoneNumbers: { kalif: '32415638' }
             }
         };
     case 'bar-address':
@@ -886,7 +843,10 @@ function mockObject(id) {
                 position: { id: 'sektionsleder' },
                 employedAt: { id: 'id-50150' },
                 phoneNumbers: { some: '23232323' },
-                emailAddresses: { some: 'someone@somewhere.com' },
+                emailAddresses: {
+                    some: 'someone@somewhere.com',
+                    tst: 'someone@thisted.dk'
+                },
                 foreignIds: { opusId: '35', employeeId: '0035' }
             }
         };
@@ -899,7 +859,10 @@ function mockObject(id) {
                 position: { id: 'teamleder' },
                 employedAt: { id: 'id-50128' },
                 phoneNumbers: { some: '23232323' },
-                emailAddresses: { some: 'someone@somewhere.com' },
+                emailAddresses: {
+                    some: 'someone@somewhere.com',
+                    tst: 'someone@thisted.dk'
+                },
                 foreignIds: { opusId: '36', employeeId: '0036' }
             }
         };
@@ -935,6 +898,7 @@ function mockObject(id) {
             id: 'sektionsleder',
             snapshot: {
                 name: 'Sektionsleder',
+                shortName: 'SEKLED',
                 foreignIds: { opusId: '11' }
             }
         };
@@ -943,6 +907,7 @@ function mockObject(id) {
             id: 'teamleder',
             snapshot: {
                 name: 'Teamleder',
+                shortName: 'TMLED',
                 foreignIds: { opusId: '12' }
             }
         };
@@ -969,4 +934,12 @@ function mockObject(id) {
     default:
         throw new Error('unknown object: ' + id);
     }
+}
+
+function removeBlanks(object) {
+    var newo = JSON.parse(JSON.stringify(object));
+    Object.keys(newo).forEach(function(key) {
+        if (!newo[key]) { delete newo[key]; }
+    });
+    return newo;
 }
