@@ -114,7 +114,7 @@ describe('Perspectives', function() {
 	      EnhedEksterntId: '50128',
 	      EnhedNavn: 'Plaf',
               StiFraRod: 'Plaf',
-              Bruger1: 'kai',
+              'Bruger System 1': 'kai',
               CprNummer: '0303030303',
               Telefon: '23232323',
               'Email thisted.dk': 'someone@thisted.dk',
@@ -132,7 +132,7 @@ describe('Perspectives', function() {
 	      EnhedEksterntId: '50150',
 	      EnhedNavn: 'Plif',
               StiFraRod: 'Plaf < Plif',
-              Bruger1: 'vai',
+              'Bruger System 1': 'vai',
               CprNummer: '0101010101',
               Telefon: '23232323',
               'Email thisted.dk': 'someone@thisted.dk',
@@ -195,7 +195,7 @@ describe('Perspectives', function() {
               RolleId: 'leder',
               RolleEksterntId: '8',
               RolleNavn: 'Leder',
-              Bruger1: 'vai',
+              'Bruger System 1': 'vai',
               Telefon: '23232323',
               'Email thisted.dk': 'someone@thisted.dk',
               Ansvar: 'Foo Responsibility, Bar Responsibility',
@@ -212,7 +212,7 @@ describe('Perspectives', function() {
               RolleEksterntId: '9',
               RolleNavn: 'Altmuligmand',
               StiFraRod: 'Plaf < Plif',
-              Bruger1: 'kai',
+              'Bruger System 1': 'kai',
               Telefon: '23232323',
               'Email thisted.dk': 'someone@thisted.dk',
               Ansvar: 'Foo Responsibility, Bar Responsibility',
@@ -272,8 +272,7 @@ describe('Perspectives', function() {
               StiFraRod: 'Plaf',
               Brugernavn: 'kai',
               'Email thisted.dk': 'someone@thisted.dk',
-              SystemId: 'system-1',
-              SystemNavn: 'System 1',
+              Systemer: 'System 1',
               HomeDirectory: '',
               HomeDrive: '',
 	      AktivFra: '',
@@ -290,8 +289,7 @@ describe('Perspectives', function() {
               StiFraRod: 'Plaf < Plif',
               Brugernavn: 'vai',
               'Email thisted.dk': 'someone@thisted.dk',
-              SystemId: 'system-1',
-              SystemNavn: 'System 1',
+              Systemer: 'System 1',
               HomeDirectory: '',
               HomeDrive: '',
 	      AktivFra: '',
@@ -532,10 +530,10 @@ function _before() {
                         mockObject(object.snapshot.role.id);
                 });
                 return Promise.resolve(objects);
-            case '"snapshot.system"':
+            case '"snapshot.systems"':
                 objects.forEach(function(object) {
-                    object.snapshot.system =
-                        mockObject(object.snapshot.system.id);
+                    object.snapshot.systems =
+                        [ mockObject(object.snapshot.systems.buff.id) ];
                 });
                 return Promise.resolve(objects);
             case '"snapshot.responsibilities"':
@@ -599,6 +597,13 @@ function _before() {
                     object.snapshot.userAccounts = [
                         object.id === 'ansaettelse' ? mockObject('user-account') : mockObject('user-account2')
                     ];
+                });
+                return Promise.resolve(objects);
+            case '["snapshot.userAccounts","snapshot.systems"]':
+                objects.forEach(function(object) {
+                    Object.keys(object.snapshot.userAccounts).forEach(function(k) {
+                        object.snapshot.userAccounts[k].snapshot.systems = [ mockObject('system-1') ];
+                    });
                 });
                 return Promise.resolve(objects);
             case '["snapshot.assignments","snapshot.role"]':
@@ -873,7 +878,7 @@ function mockObject(id) {
                 username: 'vai',
                 employments: { ansaettelse: { id: 'ansaettelse' } },
                 foreignIds: { aauId: '3001', staffId: '1001' },
-                system: { id: 'system-1' }
+                systems: { buff: { id: 'system-1' } }
             }
         };
     case 'user-account2':
@@ -883,7 +888,7 @@ function mockObject(id) {
                 username: 'kai',
                 employments: { ansaettelse: { id: 'ansaettelse2' } },
                 foreignIds: { aauId: '3002', staffId: '1002' },
-                system: { id: 'system-1' }
+                systems: { buff: { id: 'system-1' } }
             }
         };
     case 'system-1':
