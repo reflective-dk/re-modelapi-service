@@ -6,6 +6,16 @@ types:
     singular: address
     plural: addresses
     classId: 6ec80fc8-4ba4-49e2-88bf-e31032cca129
+  application:
+    key: application
+    singular: application
+    plural: applications
+    classId: 667fd8c5-9a50-4488-ab6c-b1afe3ed6495
+  archive:
+    key: archive
+    singular: archive
+    plural: archives
+    classId: 0f7939e1-de3b-4a40-8d56-eb51c71345d8
   employmentGroup:
     key: employmentGroup
     singular: employment-group
