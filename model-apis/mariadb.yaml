@@ -1,0 +1,9 @@
+---
+key: mariadb
+types:
+  unit:
+    key: table
+    singular: table
+    plural: tables
+    classId: e99d7f86-739c-40e7-953b-d73869572066
+...
