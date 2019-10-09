@@ -16,7 +16,7 @@ var express = require('express');
 var app = express();
 
 var modelApis = requireyml(__dirname + '/model-apis');
-var perspectives = new (require('./lib/perspectives'))(api);
+var perspectives = new (require('./lib/perspectives/perspectives'))(api);
 
 module.exports = app.listen(8080, function() {
     logger.info('service ready');

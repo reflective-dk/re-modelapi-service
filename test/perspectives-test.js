@@ -6,7 +6,7 @@ var chai = require('chai');
 chai.use(require('chai-as-promised'));
 var expect = chai.expect;
 
-var Perspectives = require('../lib/perspectives');
+var Perspectives = require('../lib/perspectives/perspectives');
 var util = require('../lib/util');
 var models = require('re-models').model;
 var csvjson = require('csvjson');
