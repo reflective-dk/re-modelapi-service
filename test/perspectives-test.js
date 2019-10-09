@@ -15,7 +15,6 @@ var context = { domain: 'thisted' };
 var request = { header: function() { return JSON.stringify(context); } };
 var next = console.log;
 
-if (false)
 describe('Perspectives', function() {
     before(_before);
 
