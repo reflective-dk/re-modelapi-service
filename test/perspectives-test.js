@@ -334,6 +334,62 @@ describe('Perspectives', function() {
         });
     });
 
+    describe('rights', function() {
+        var expected = [
+            { Id: 'right2',
+              EksterntId: 'tokai-fbak',
+              Navn: 'Rettighed-Tokai',
+              Titel: 'Tokai Falilumbaknau',
+              Beskrivelse: 'En Tokai Falilumbaknau er god fordi ...',
+              System: '',
+              KræverGodkendelse: 'true' },
+            { Id: 'right1',
+              EksterntId: 'trekai-trekai',
+              Navn: 'Rettighed-Trekai',
+              Titel: 'Trekai Knapsåvild',
+              Beskrivelse: 'En Trekai Knapsåvild er okay',
+              System: '',
+              KræverGodkendelse: 'false' }
+        ];
+
+        it('should return expected result', function(done) {
+            var perspectives = this.perspectives;
+            expect(new Promise(function(resolve) {
+                perspectives.rights(request, {
+                    send: function(body) {
+                        resolve({ status: 200, body: JSON.parse(JSON.stringify(body)) });
+                    },
+                    set: function() {},
+                    format: function(handlers) {
+                        return handlers.default();
+                    }
+                }, next);
+            })).to.eventually.deep.equal({
+                status: 200,
+                body: expected
+            }).notify(done);
+        });
+
+        it('should return convert to CSV if requested', function(done) {
+            var perspectives = this.perspectives;
+            expect(new Promise(function(resolve) {
+                perspectives.rights(request, {
+                    send: function(body) {
+                        resolve({ status: 200, body: JSON.parse(JSON.stringify(body)) });
+                    },
+                    set: function() {},
+                    format: function(handlers) {
+                        return handlers['text/csv']();
+                    }
+                }, next);
+            }).then(function(response) {
+                return csvjson.toObject(response.body, {
+                    delimiter: ';', quote: '"'
+                });
+            })).to.eventually.deep.equal(expected).notify(done);
+        });
+    });
+
     describe('locations', function() {
         var expected = [
             { Id: 'foo-location',
@@ -431,6 +487,11 @@ function _before() {
                     return Promise.resolve({ objects: [
                         mockObject('user-account'),
                         mockObject('user-account2')
+                    ] });
+                case models.ro.classes.right.id:
+                    return Promise.resolve({ objects: [
+                        mockObject('right1'),
+                        mockObject('right2')
                     ] });
                 case models.ro.classes.location.id:
                     return Promise.resolve({ objects: [
@@ -889,6 +950,28 @@ function mockObject(id) {
                 employments: { ansaettelse: { id: 'ansaettelse2' } },
                 foreignIds: { aauId: '3002', staffId: '1002' },
                 systems: { buff: { id: 'system-1' } }
+            }
+        };
+    case 'right1':
+        return {
+            id: 'right1',
+            snapshot: {
+                name: 'Rettighed-Trekai',
+                description: 'En Trekai Knapsåvild er okay',
+                foreignIds: { foo: 'trekai-trekai' },
+                aliases: { title: 'Trekai Knapsåvild' },
+                requiresApproval: false
+            }
+        };
+    case 'right2':
+        return {
+            id: 'right2',
+            snapshot: {
+                name: 'Rettighed-Tokai',
+                description: 'En Tokai Falilumbaknau er god fordi ...',
+                foreignIds: { foo: 'tokai-fbak' },
+                aliases: { title: 'Tokai Falilumbaknau' },
+                requiresApproval: true
             }
         };
     case 'system-1':
