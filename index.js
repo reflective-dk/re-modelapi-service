@@ -75,6 +75,14 @@ function userAccountPerspective(request, response, next) {
     return perspectives.userAccounts(request, response, next);
 }
 
+app.get('/perspective/rights', rightPerspective);
+app.post('/perspective/rights', rightPerspective);
+app.get('/api/perspective/rights', auth(JWT_SECRET), rightPerspective);
+app.post('/api/perspective/rights', auth(JWT_SECRET), rightPerspective);
+function rightPerspective(request, response, next) {
+    return perspectives.rights(request, response, next);
+}
+
 app.get('/perspective/locations', locationPerspective);
 app.post('/perspective/locations', locationPerspective);
 app.get('/api/perspective/locations', auth(JWT_SECRET), locationPerspective);
