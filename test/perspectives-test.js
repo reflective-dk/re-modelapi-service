@@ -341,14 +341,16 @@ describe('Perspectives', function() {
               Navn: 'Rettighed-Tokai',
               Titel: 'Tokai Falilumbaknau',
               Beskrivelse: 'En Tokai Falilumbaknau er god fordi ...',
-              System: '',
+              AntalAllokeringer: '2',
+              System: 'System 1',
               KræverGodkendelse: 'true' },
             { Id: 'right1',
               EksterntId: 'trekai-trekai',
               Navn: 'Rettighed-Trekai',
               Titel: 'Trekai Knapsåvild',
               Beskrivelse: 'En Trekai Knapsåvild er okay',
-              System: '',
+              AntalAllokeringer: '1',
+              System: 'System 1',
               KræverGodkendelse: 'false' }
         ];
 
@@ -591,6 +593,12 @@ function _before() {
                         mockObject(object.snapshot.role.id);
                 });
                 return Promise.resolve(objects);
+            case '"snapshot.system"':
+                objects.forEach(function(object) {
+                    object.snapshot.system =
+                        mockObject(object.snapshot.system.id);
+                });
+                return Promise.resolve(objects);
             case '"snapshot.systems"':
                 objects.forEach(function(object) {
                     object.snapshot.systems =
@@ -658,6 +666,13 @@ function _before() {
                     object.snapshot.userAccounts = [
                         object.id === 'ansaettelse' ? mockObject('user-account') : mockObject('user-account2')
                     ];
+                });
+                return Promise.resolve(objects);
+            case '"snapshot.allocations"':
+                objects.forEach(function(object) {
+                    object.snapshot.allocations = object.id === 'right1'
+                        ? [ mockObject('allocation-right1') ]
+                        : [ mockObject('allocation-right2a'), mockObject('allocation-right2b') ];
                 });
                 return Promise.resolve(objects);
             case '["snapshot.userAccounts","snapshot.systems"]':
@@ -960,7 +975,8 @@ function mockObject(id) {
                 description: 'En Trekai Knapsåvild er okay',
                 foreignIds: { foo: 'trekai-trekai' },
                 aliases: { title: 'Trekai Knapsåvild' },
-                requiresApproval: false
+                requiresApproval: false,
+                system: { id: 'system-1' }
             }
         };
     case 'right2':
@@ -971,7 +987,8 @@ function mockObject(id) {
                 description: 'En Tokai Falilumbaknau er god fordi ...',
                 foreignIds: { foo: 'tokai-fbak' },
                 aliases: { title: 'Tokai Falilumbaknau' },
-                requiresApproval: true
+                requiresApproval: true,
+                system: { id: 'system-1' }
             }
         };
     case 'system-1':
@@ -980,6 +997,21 @@ function mockObject(id) {
             snapshot: {
                 name: 'System 1'
             }
+        };
+    case 'allocation-right1':
+        return {
+            id: 'allocation-right1',
+            snapshot: {}
+        };
+    case 'allocation-right2a':
+        return {
+            id: 'allocation-right2a',
+            snapshot: {}
+        };
+    case 'allocation-right2b':
+        return {
+            id: 'allocation-right2b',
+            snapshot: {}
         };
     case 'sektionsleder':
         return {
