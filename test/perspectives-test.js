@@ -341,7 +341,7 @@ describe('Perspectives', function() {
               Navn: 'Rettighed-Tokai',
               Titel: 'Tokai Falilumbaknau',
               Beskrivelse: 'En Tokai Falilumbaknau er god fordi ...',
-              AntalAllokeringer: '2',
+              AntalAllokeringer: 2,
               System: 'System 1',
               KræverGodkendelse: 'true' },
             { Id: 'right1',
@@ -349,7 +349,7 @@ describe('Perspectives', function() {
               Navn: 'Rettighed-Trekai',
               Titel: 'Trekai Knapsåvild',
               Beskrivelse: 'En Trekai Knapsåvild er okay',
-              AntalAllokeringer: '1',
+              AntalAllokeringer: 1,
               System: 'System 1',
               KræverGodkendelse: 'false' }
         ];
@@ -388,6 +388,9 @@ describe('Perspectives', function() {
                 return csvjson.toObject(response.body, {
                     delimiter: ';', quote: '"'
                 });
+            }).tap(function(objects) {
+                // Testing hack to work around dodgy CSV -> JSON conversion
+                objects.forEach(o => o.AntalAllokeringer = parseInt(o.AntalAllokeringer));
             })).to.eventually.deep.equal(expected).notify(done);
         });
     });
