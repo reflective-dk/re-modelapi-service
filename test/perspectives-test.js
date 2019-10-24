@@ -675,7 +675,7 @@ function _before() {
                 objects.forEach(function(object) {
                     object.snapshot.allocations = object.id === 'right1'
                         ? [ mockObject('allocation-right1') ]
-                        : [ mockObject('allocation-right2a'), mockObject('allocation-right2b') ];
+                        : [ mockObject('allocation-right2a'), mockObject('allocation-right2b'), mockObject('allocation-right2c-no-longer-active') ];
                 });
                 return Promise.resolve(objects);
             case '["snapshot.userAccounts","snapshot.systems"]':
@@ -1015,6 +1015,13 @@ function mockObject(id) {
         return {
             id: 'allocation-right2b',
             snapshot: {}
+        };
+    case 'allocation-right2c-no-longer-active':
+        return {
+            id: 'allocation-right2c-no-longer-active',
+            snapshot: {
+                activeTo: '2000-01-01T00:00:00.000Z'
+            }
         };
     case 'sektionsleder':
         return {
