@@ -978,7 +978,7 @@ function mockObject(id) {
                 description: 'En Trekai Knapsåvild er okay',
                 foreignIds: { foo: 'trekai-trekai' },
                 aliases: { title: 'Trekai Knapsåvild' },
-                requiresApproval: false,
+                attestable: false,
                 system: { id: 'system-1' }
             }
         };
@@ -990,7 +990,7 @@ function mockObject(id) {
                 description: 'En Tokai Falilumbaknau er god fordi ...',
                 foreignIds: { foo: 'tokai-fbak' },
                 aliases: { title: 'Tokai Falilumbaknau' },
-                requiresApproval: true,
+                attestable: true,
                 system: { id: 'system-1' }
             }
         };
