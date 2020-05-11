@@ -15,6 +15,9 @@ var context = { domain: 'thisted' };
 var request = { header: function() { return JSON.stringify(context); } };
 var next = console.log;
 
+// TODO: Certain responsibilities should be common across customers
+var THISTED_PERSONALEANSVAR = '87341d78-23db-4d78-94cf-5fd02b73060a';
+
 describe('Perspectives', function() {
     before(_before);
 
@@ -113,11 +116,18 @@ describe('Perspectives', function() {
 	      EnhedId: 'id-50128',
 	      EnhedEksterntId: '50128',
 	      EnhedNavn: 'Plaf',
+              'NaermesteLederEmail thisted.dk': '',
+              NaermesteLederLederniveau: '',
+              NaermesteLederMedarbejdernummer: '',
+              NaermesteLederNavn: '',
+              NaermesteLederStilling: '',
               StiFraRod: 'Plaf',
               'Bruger System 1': 'kai',
               CprNummer: '0303030303',
               Telefon: '23232323',
-              'Email thisted.dk': 'someone@thisted.dk',
+              'Email thisted.dk': 'ss@thisted.dk',
+              ErLeder: 'true',
+              EgetLederniveau: '42',
               StillingEksterntId: '12',
               StillingId: 'teamleder',
               StillingNavn: 'Teamleder',
@@ -131,11 +141,18 @@ describe('Perspectives', function() {
 	      EnhedId: 'id-50150',
 	      EnhedEksterntId: '50150',
 	      EnhedNavn: 'Plif',
+              NaermesteLederNavn: 'Svend Svendsen',
+              NaermesteLederMedarbejdernummer: '0036',
+              'NaermesteLederEmail thisted.dk': 'ss@thisted.dk',
+              NaermesteLederStilling: 'Teamleder',
+              NaermesteLederLederniveau: '42',
               StiFraRod: 'Plaf < Plif',
               'Bruger System 1': 'vai',
               CprNummer: '0101010101',
               Telefon: '23232323',
-              'Email thisted.dk': 'someone@thisted.dk',
+              'Email thisted.dk': 'll@thisted.dk',
+              ErLeder: 'false',
+              EgetLederniveau: '',
               StillingEksterntId: '11',
               StillingId: 'sektionsleder',
               StillingNavn: 'Sektionsleder',
@@ -185,9 +202,9 @@ describe('Perspectives', function() {
     describe('roleAssignments', function() {
         var expected = [
             { Id: 'ledertildeling',
-              MedarbejderId: 'ansaettelse',
-              MedarbejderEksterntId: '35, 0035',
-              MedarbejderNavn: 'Lars Larsen',
+              MedarbejderId: 'ansaettelse2',
+              MedarbejderEksterntId: '36, 0036',
+              MedarbejderNavn: 'Svend Svendsen',
 	      EnhedId: 'id-50128',
 	      EnhedEksterntId: '50128',
 	      EnhedNavn: 'Plaf',
@@ -195,16 +212,16 @@ describe('Perspectives', function() {
               RolleId: 'leder',
               RolleEksterntId: '8',
               RolleNavn: 'Leder',
-              'Bruger System 1': 'vai',
+              'Bruger System 1': 'kai',
               Telefon: '23232323',
-              'Email thisted.dk': 'someone@thisted.dk',
-              Ansvar: 'Foo Responsibility, Bar Responsibility',
+              'Email thisted.dk': 'ss@thisted.dk',
+              Ansvar: 'Foo Responsibility, Bar Responsibility, Personaleansvar',
 	      AktivFra: '',
 	      AktivTil: '' },
             { Id: 'altmuligmandtildeling',
-              MedarbejderId: 'ansaettelse2',
-              MedarbejderEksterntId: '36, 0036',
-              MedarbejderNavn: 'Svend Svendsen',
+              MedarbejderId: 'ansaettelse',
+              MedarbejderEksterntId: '35, 0035',
+              MedarbejderNavn: 'Lars Larsen',
 	      EnhedId: 'id-50150',
 	      EnhedEksterntId: '50150',
 	      EnhedNavn: 'Plif',
@@ -212,9 +229,9 @@ describe('Perspectives', function() {
               RolleEksterntId: '9',
               RolleNavn: 'Altmuligmand',
               StiFraRod: 'Plaf < Plif',
-              'Bruger System 1': 'kai',
+              'Bruger System 1': 'vai',
               Telefon: '23232323',
-              'Email thisted.dk': 'someone@thisted.dk',
+              'Email thisted.dk': 'll@thisted.dk',
               Ansvar: 'Foo Responsibility, Bar Responsibility',
 	      AktivFra: '',
 	      AktivTil: '' }
@@ -271,7 +288,7 @@ describe('Perspectives', function() {
 	      EnhedNavn: 'Plaf',
               StiFraRod: 'Plaf',
               Brugernavn: 'kai',
-              'Email thisted.dk': 'someone@thisted.dk',
+              'Email thisted.dk': 'ss@thisted.dk',
               Systemer: 'System 1',
               HomeDirectory: '',
               HomeDrive: '',
@@ -288,7 +305,7 @@ describe('Perspectives', function() {
 	      EnhedNavn: 'Plif',
               StiFraRod: 'Plaf < Plif',
               Brugernavn: 'vai',
-              'Email thisted.dk': 'someone@thisted.dk',
+              'Email thisted.dk': 'll@thisted.dk',
               Systemer: 'System 1',
               HomeDirectory: '',
               HomeDrive: '',
@@ -610,7 +627,12 @@ function _before() {
                 return Promise.resolve(objects);
             case '"snapshot.responsibilities"':
                 objects.forEach(function(object) {
-                    object.snapshot.responsibilities = [
+                    var personale = _.get(object, 'snapshot.responsibilities.personale.id');
+                    object.snapshot.responsibilities = personale ? [
+                        mockObject(object.snapshot.responsibilities.fooRes.id),
+                        mockObject(object.snapshot.responsibilities.barRes.id),
+                        mockObject(personale),
+                    ] : [
                         mockObject(object.snapshot.responsibilities.fooRes.id),
                         mockObject(object.snapshot.responsibilities.barRes.id)
                     ];
@@ -661,7 +683,11 @@ function _before() {
                 return Promise.resolve(objects);
             case '"snapshot.assignments"':
                 objects.forEach(function(object) {
-                    object.snapshot.assignments = [ mockObject('ledertildeling') ];
+                    object.snapshot.assignments = [
+                        object.id === 'ansaettelse'
+                            ? mockObject('altmuligmandtildeling')
+                            : mockObject('ledertildeling')
+                    ];
                 });
                 return Promise.resolve(objects);
             case '"snapshot.userAccounts"':
@@ -689,12 +715,6 @@ function _before() {
                 objects.forEach(function(object) {
                     object.snapshot.assignments.ledertildeling.snapshot.role =
                         mockObject(object.snapshot.assignments.ledertildeling.snapshot.role.id);
-                });
-                return Promise.resolve(objects);
-            case '["snapshot.assignments","snapshot.employment"]':
-                objects.forEach(function(object) {
-                    object.snapshot.assignments.ledertildeling.snapshot.employment =
-                        mockObject(object.snapshot.assignments.ledertildeling.snapshot.employment.id);
                 });
                 return Promise.resolve(objects);
             default:
@@ -853,13 +873,16 @@ function mockObject(id) {
             id: 'ledertildeling',
             snapshot: {
                 class: models.ro.classes['role-assignment'].ref,
+                name: 'Svend Svendsen leder Plaf',
                 role: { id: 'leder' },
-                employment: { id: 'ansaettelse' },
+                employment: { id: 'ansaettelse2' },
                 propagateFrom: { id: 'id-50128' },
                 responsibilities: {
                     fooRes: { id: 'foo-res' },
-                    barRes: { id: 'bar-res' }
-                }
+                    barRes: { id: 'bar-res' },
+                    personale: { id: THISTED_PERSONALEANSVAR }
+                },
+                aliases: { ledelsesniveau: '42' }
             }
         };
     case 'leder':
@@ -871,7 +894,8 @@ function mockObject(id) {
                 responsibilities: {
                     fooRes: { id: 'foo-res' },
                     barRes: { id: 'bar-res' },
-                    lederRes: { id: 'leder-res' }
+                    lederRes: { id: 'leder-res' },
+                    personale: { id: THISTED_PERSONALEANSVAR }
                 }
             }
         };
@@ -881,7 +905,7 @@ function mockObject(id) {
             snapshot: {
                 class: models.ro.classes['role-assignment'].ref,
                 role: { id: 'altmuligmand' },
-                employment: { id: 'ansaettelse2' },
+                employment: { id: 'ansaettelse' },
                 propagateFrom: { id: 'id-50150' },
                 responsibilities: {
                     fooRes: { id: 'foo-res' },
@@ -918,6 +942,14 @@ function mockObject(id) {
                 foreignIds: { responsibility: '1011' }
             }
         };
+    case THISTED_PERSONALEANSVAR:
+        return {
+            id: THISTED_PERSONALEANSVAR,
+            snapshot: {
+                name: 'Personaleansvar',
+                foreignIds: { responsibility: '45' }
+            }
+        };
     case 'ansaettelse':
         return {
             id: 'ansaettelse',
@@ -929,7 +961,7 @@ function mockObject(id) {
                 phoneNumbers: { some: '23232323' },
                 emailAddresses: {
                     some: 'someone@somewhere.com',
-                    tst: 'someone@thisted.dk'
+                    tst: 'll@thisted.dk'
                 },
                 foreignIds: { opusId: '35', employeeId: '0035' }
             }
@@ -945,7 +977,7 @@ function mockObject(id) {
                 phoneNumbers: { some: '23232323' },
                 emailAddresses: {
                     some: 'someone@somewhere.com',
-                    tst: 'someone@thisted.dk'
+                    tst: 'ss@thisted.dk'
                 },
                 foreignIds: { opusId: '36', employeeId: '0036' }
             }
