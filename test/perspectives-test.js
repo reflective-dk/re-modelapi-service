@@ -134,6 +134,31 @@ describe('Perspectives', function() {
               StillingKortNavn: 'TMLED',
 	      AktivFra: '',
 	      AktivTil: '' },
+            { Id: 'ansaettelse3',
+	      EksterntId: '37, 0037',
+	      Medarbejdernummer: '0037',
+	      Navn: 'Bernt Nenaber',
+	      EnhedId: 'id-50128',
+	      EnhedEksterntId: '50128',
+	      EnhedNavn: 'Plaf',
+              NaermesteLederNavn: 'Svend Svendsen',
+              NaermesteLederMedarbejdernummer: '0036',
+              'NaermesteLederEmail thisted.dk': 'ss@thisted.dk',
+              NaermesteLederStilling: 'Teamleder',
+              NaermesteLederLederniveau: '42',
+              StiFraRod: 'Plaf',
+              'Bruger System 1': 'kai',
+              CprNummer: '0404040404',
+              Telefon: '23232323',
+              'Email thisted.dk': 'bn@thisted.dk',
+              ErLeder: 'false',
+              EgetLederniveau: '',
+              StillingEksterntId: '4242',
+              StillingId: 'gulvmand',
+              StillingNavn: 'Manden på gulvet',
+              StillingKortNavn: 'GLVMND',
+	      AktivFra: '',
+	      AktivTil: '' },
             { Id: 'ansaettelse',
 	      EksterntId: '35, 0035',
 	      Medarbejdernummer: '0035',
@@ -494,7 +519,8 @@ function _before() {
                     ] });
                 case models.ro.classes.employment.id:
                     return Promise.resolve({ objects: [
-                        mockObject('ansaettelse'), mockObject('ansaettelse2')
+                        mockObject('ansaettelse'), mockObject('ansaettelse2'),
+                        mockObject('ansaettelse3')
                     ] });
                 case models.entity.classes.hierarchy.id:
                     return Promise.resolve({ objects: [
@@ -683,11 +709,12 @@ function _before() {
                 return Promise.resolve(objects);
             case '"snapshot.assignments"':
                 objects.forEach(function(object) {
-                    object.snapshot.assignments = [
+                    object.snapshot.assignments =
                         object.id === 'ansaettelse'
-                            ? mockObject('altmuligmandtildeling')
-                            : mockObject('ledertildeling')
-                    ];
+                            ? [ mockObject('altmuligmandtildeling') ]
+                            : object.id === 'ansaettelse2'
+                                ? [ mockObject('ledertildeling') ]
+                                : [];
                 });
                 return Promise.resolve(objects);
             case '"snapshot.userAccounts"':
@@ -982,6 +1009,22 @@ function mockObject(id) {
                 foreignIds: { opusId: '36', employeeId: '0036' }
             }
         };
+    case 'ansaettelse3':
+        return {
+            id: 'ansaettelse3',
+            snapshot: {
+                name: 'Ansættelse 37',
+                employee: { id: 'berntnenaber' },
+                position: { id: 'gulvmand' },
+                employedAt: { id: 'id-50128' },
+                phoneNumbers: { some: '23232323' },
+                emailAddresses: {
+                    some: 'someone@somewhere.com',
+                    tst: 'bn@thisted.dk'
+                },
+                foreignIds: { opusId: '37', employeeId: '0037' }
+            }
+        };
     case 'user-account':
         return {
             id: 'user-account',
@@ -1073,6 +1116,15 @@ function mockObject(id) {
                 foreignIds: { opusId: '12' }
             }
         };
+    case 'gulvmand':
+        return {
+            id: 'gulvmand',
+            snapshot: {
+                name: 'Manden på gulvet',
+                shortName: 'GLVMND',
+                foreignIds: { opusId: '4242' }
+            }
+        };
     case 'larslarsen':
         return {
             id: 'larslarsen',
@@ -1091,6 +1143,16 @@ function mockObject(id) {
                 givenName: 'Svend',
                 familyName: 'Svendsen',
                 cprNr: '0303030303'
+            }
+        };
+    case 'berntnenaber':
+        return {
+            id: 'berntnenaber',
+            snapshot: {
+                name: 'Bernt Nenaber',
+                givenName: 'Bernt',
+                familyName: 'Nenaber',
+                cprNr: '0404040404'
             }
         };
     default:
