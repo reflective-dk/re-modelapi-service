@@ -21,6 +21,90 @@ var THISTED_PERSONALEANSVAR = '87341d78-23db-4d78-94cf-5fd02b73060a';
 describe('Perspectives', function() {
     before(_before);
 
+    describe('activity filtering', function() {
+        it('should return only active elements by default', function(done) {
+            var perspectives = this.perspectives;
+            expect(new Promise(function(resolve) {
+                perspectives.units(request, {
+                    send: function(body) {
+                        resolve({ status: 200, body: JSON.parse(JSON.stringify(body)) });
+                    },
+                    set: function() {},
+                    format: function(handlers) { return handlers.default(); }
+                }, next);
+            }).then(response => response.body.map(u => u.Id)))
+                .to.eventually.have.members([ 'id-50128', 'id-50150' ]).notify(done);
+        });
+
+        it('should return only active elements with activity filter \'active-only\'', function(done) {
+            var perspectives = this.perspectives;
+            expect(new Promise(function(resolve) {
+                perspectives.units(Object.assign({
+                    body: { activityFilter: 'active-only' }
+                }, request), {
+                    send: function(body) {
+                        resolve({ status: 200, body: JSON.parse(JSON.stringify(body)) });
+                    },
+                    set: function() {},
+                    format: function(handlers) { return handlers.default(); }
+                }, next);
+            }).then(response => response.body.map(u => u.Id)))
+                .to.eventually.have.members([ 'id-50128', 'id-50150' ]).notify(done);
+        });
+
+        it('should return active and future elements with activity filter \'active-and-future\'', function(done) {
+            var perspectives = this.perspectives;
+            expect(new Promise(function(resolve) {
+                perspectives.units(Object.assign({
+                    body: { activityFilter: 'active-and-future' }
+                }, request), {
+                    send: function(body) {
+                        resolve({ status: 200, body: JSON.parse(JSON.stringify(body)) });
+                    },
+                    set: function() {},
+                    format: function(handlers) { return handlers.default(); }
+                }, next);
+            }).then(response => response.body.map(u => u.Id)))
+                .to.eventually.have.members([
+                    'id-50128', 'id-50150', 'id-50175-future'
+                ]).notify(done);
+        });
+
+        it('should return all elements with activity filter \'all\'', function(done) {
+            var perspectives = this.perspectives;
+            expect(new Promise(function(resolve) {
+                perspectives.units(Object.assign({
+                    body: { activityFilter: 'all' }
+                }, request), {
+                    send: function(body) {
+                        resolve({ status: 200, body: JSON.parse(JSON.stringify(body)) });
+                    },
+                    set: function() {},
+                    format: function(handlers) { return handlers.default(); }
+                }, next);
+            }).then(response => response.body.map(u => u.Id)))
+                .to.eventually.have.members([
+                    'id-50128', 'id-50150', 'id-50175-future', 'id-50129-old'
+                ]).notify(done);
+        });
+
+        it('should return only active elements with activity filter \'gobbledygook\'', function(done) {
+            var perspectives = this.perspectives;
+            expect(new Promise(function(resolve) {
+                perspectives.units(Object.assign({
+                    body: { activityFilter: 'gobbledygook' }
+                }, request), {
+                    send: function(body) {
+                        resolve({ status: 200, body: JSON.parse(JSON.stringify(body)) });
+                    },
+                    set: function() {},
+                    format: function(handlers) { return handlers.default(); }
+                }, next);
+            }).then(response => response.body.map(u => u.Id)))
+                .to.eventually.have.members([ 'id-50128', 'id-50150' ]).notify(done);
+        });
+    });
+
     describe('units', function() {
         var expected = [
             { Id: 'id-50128',
@@ -515,7 +599,8 @@ function _before() {
                 switch (args.query.relatesTo.class) {
                 case models.ro.classes.unit.id:
                     return Promise.resolve({ objects: [
-                        mockObject('id-50150'), mockObject('id-50128'), mockObject('id-50129-old')
+                        mockObject('id-50150'), mockObject('id-50128'),
+                        mockObject('id-50129-old'), mockObject('id-50175-future')
                     ] });
                 case models.ro.classes.employment.id:
                     return Promise.resolve({ objects: [
@@ -805,13 +890,35 @@ function mockObject(id) {
                 aliases: { navnHCM: 'Første studieår - HCM' },
                 organizations: { administrativ: { id: 'admin-org' } },
                 foreignIds: { orgUnitId: '50129' },
-                unitType: { id: 'administrationsenhed' },
+                unitType: { id: 'afdeling' },
+                locations: { foo: { id: 'foo-location' } },
                 emailAddresses: { klak: 'plif@thisted.dk' },
                 phoneNumbers: { klok: '23456789' },
                 ean: { pluf: '0123456789012' },
                 seNr: '77777777',
                 activeFrom: '2018-06-01T00:00:00.000Z',
                 activeTo: '2018-12-01T00:00:00.000Z'
+            },
+            from: '2018-01-01T00:00:00.000Z'
+        };
+    case 'id-50175-future':
+        return {
+            id: 'id-50175-future',
+            snapshot: {
+                class: models.ro.classes.unit.ref,
+                name: 'FREEEMTID',
+                shortName: 'FREMAD',
+                aliases: { navnHCM: 'fremfrem' },
+                organizations: { administrativ: { id: 'admin-org' } },
+                foreignIds: { orgUnitId: '50175' },
+                unitType: { id: 'afdeling' },
+                locations: { foo: { id: 'foo-location' } },
+                emailAddresses: { klak: 'katchak@thisted.dk' },
+                phoneNumbers: { klok: '23456444' },
+                ean: { pluf: '0123456789011' },
+                seNr: '44444444',
+                activeFrom: '2222-06-01T00:00:00.000Z',
+                activeTo: '2222-12-01T00:00:00.000Z'
             },
             from: '2018-01-01T00:00:00.000Z'
         };
