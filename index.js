@@ -44,49 +44,49 @@ Object.keys(modelApis).forEach(function(apiKey) {
 // PERSPECTIVES
 
 app.get('/perspective/units', unitPerspective);
-app.post('/perspective/units', unitPerspective);
+app.post('/perspective/units', express.json(), unitPerspective);
 app.get('/api/perspective/units', auth(JWT_SECRET), unitPerspective);
-app.post('/api/perspective/units', auth(JWT_SECRET), unitPerspective);
+app.post('/api/perspective/units', auth(JWT_SECRET), express.json(), unitPerspective);
 function unitPerspective(request, response, next) {
     return perspectives.units(request, response, next);
 }
 
 app.get('/perspective/employees', employeePerspective);
-app.post('/perspective/employees', employeePerspective);
+app.post('/perspective/employees', express.json(), employeePerspective);
 app.get('/api/perspective/employees', auth(JWT_SECRET), employeePerspective);
-app.post('/api/perspective/employees', auth(JWT_SECRET), employeePerspective);
+app.post('/api/perspective/employees', auth(JWT_SECRET), express.json(), employeePerspective);
 function employeePerspective(request, response, next) {
     return perspectives.employees(request, response, next);
 }
 
 app.get('/perspective/role-assignments', roleAssignmentPerspective);
-app.post('/perspective/role-assignments', roleAssignmentPerspective);
+app.post('/perspective/role-assignments', express.json(), roleAssignmentPerspective);
 app.get('/api/perspective/role-assignments', auth(JWT_SECRET), roleAssignmentPerspective);
-app.post('/api/perspective/role-assignments', auth(JWT_SECRET), roleAssignmentPerspective);
+app.post('/api/perspective/role-assignments', auth(JWT_SECRET), express.json(), roleAssignmentPerspective);
 function roleAssignmentPerspective(request, response, next) {
     return perspectives.roleAssignments(request, response, next);
 }
 
 app.get('/perspective/user-accounts', userAccountPerspective);
-app.post('/perspective/user-accounts', userAccountPerspective);
+app.post('/perspective/user-accounts', express.json(), userAccountPerspective);
 app.get('/api/perspective/user-accounts', auth(JWT_SECRET), userAccountPerspective);
-app.post('/api/perspective/user-accounts', auth(JWT_SECRET), userAccountPerspective);
+app.post('/api/perspective/user-accounts', auth(JWT_SECRET), express.json(), userAccountPerspective);
 function userAccountPerspective(request, response, next) {
     return perspectives.userAccounts(request, response, next);
 }
 
 app.get('/perspective/rights', rightPerspective);
-app.post('/perspective/rights', rightPerspective);
+app.post('/perspective/rights', express.json(), rightPerspective);
 app.get('/api/perspective/rights', auth(JWT_SECRET), rightPerspective);
-app.post('/api/perspective/rights', auth(JWT_SECRET), rightPerspective);
+app.post('/api/perspective/rights', auth(JWT_SECRET), express.json(), rightPerspective);
 function rightPerspective(request, response, next) {
     return perspectives.rights(request, response, next);
 }
 
 app.get('/perspective/locations', locationPerspective);
-app.post('/perspective/locations', locationPerspective);
+app.post('/perspective/locations', express.json(), locationPerspective);
 app.get('/api/perspective/locations', auth(JWT_SECRET), locationPerspective);
-app.post('/api/perspective/locations', auth(JWT_SECRET), locationPerspective);
+app.post('/api/perspective/locations', auth(JWT_SECRET), express.json(), locationPerspective);
 function locationPerspective(request, response, next) {
     return perspectives.locations(request, response, next);
 }
