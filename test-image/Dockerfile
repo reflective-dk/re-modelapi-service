@@ -1,4 +1,4 @@
-FROM gcr.io/city-7337/base
+FROM gcr.io/city-7337/base:node-10.20.1
 
 COPY package.json package.json
 COPY test test
