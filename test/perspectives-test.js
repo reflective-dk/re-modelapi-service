@@ -200,6 +200,7 @@ describe('Perspectives', function() {
 	      EnhedId: 'id-50128',
 	      EnhedEksterntId: '50128',
 	      EnhedNavn: 'Plaf',
+              EnhedAdresse: 'Skolegade 15, 7700 Thisted, Danmark',
               'LederEmail thisted.dk': '',
               LederLederniveau: '',
               LederMedarbejdernummer: '',
@@ -216,6 +217,8 @@ describe('Perspectives', function() {
               StillingId: 'teamleder',
               StillingNavn: 'Teamleder',
               StillingKortNavn: 'TMLED',
+              TimetalNaevner: '32',
+              TimetalTaeller: '22',
 	      AktivFra: '',
 	      AktivTil: '' },
             { Id: 'ansaettelse3',
@@ -225,6 +228,7 @@ describe('Perspectives', function() {
 	      EnhedId: 'id-50128',
 	      EnhedEksterntId: '50128',
 	      EnhedNavn: 'Plaf',
+              EnhedAdresse: 'Skolegade 15, 7700 Thisted, Danmark',
               LederNavn: 'Svend Svendsen',
               LederMedarbejdernummer: '0036',
               'LederEmail thisted.dk': 'ss@thisted.dk',
@@ -241,6 +245,8 @@ describe('Perspectives', function() {
               StillingId: 'gulvmand',
               StillingNavn: 'Manden på gulvet',
               StillingKortNavn: 'GLVMND',
+              TimetalNaevner: '33',
+              TimetalTaeller: '23',
 	      AktivFra: '',
 	      AktivTil: '' },
             { Id: 'ansaettelse',
@@ -250,6 +256,7 @@ describe('Perspectives', function() {
 	      EnhedId: 'id-50150',
 	      EnhedEksterntId: '50150',
 	      EnhedNavn: 'Plif',
+              EnhedAdresse: 'Skolegade 20, 7700 Thisted, Danmark',
               LederNavn: 'Svend Svendsen',
               LederMedarbejdernummer: '0036',
               'LederEmail thisted.dk': 'ss@thisted.dk',
@@ -266,6 +273,8 @@ describe('Perspectives', function() {
               StillingId: 'sektionsleder',
               StillingNavn: 'Sektionsleder',
               StillingKortNavn: 'SEKLED',
+              TimetalNaevner: '31',
+              TimetalTaeller: '21',
 	      AktivFra: '',
 	      AktivTil: '' }
         ];
@@ -664,6 +673,18 @@ function _before() {
                     }
                 });
                 return Promise.resolve(objects);
+            case '["snapshot.employedAt","snapshot.locations"]':
+                objects.forEach(function(object) {
+                    if(object.snapshot.employedAt.snapshot.locations.foo) {
+                        object.snapshot.employedAt.snapshot.locations.foo =
+                            mockObject(object.snapshot.employedAt.snapshot.locations.foo.id);
+                    }
+                    if(object.snapshot.employedAt.snapshot.locations.bar) {
+                        object.snapshot.employedAt.snapshot.locations.bar =
+                            mockObject(object.snapshot.employedAt.snapshot.locations.bar.id);
+                    }
+                });
+                return Promise.resolve(objects);
             case '"snapshot.organizations"':
                 objects.forEach(function(object) {
                     object.snapshot.organizations.administrativ =
@@ -685,6 +706,18 @@ function _before() {
                     if (object.snapshot.locations.bar) {
                         object.snapshot.locations.bar.snapshot.address =
                             mockObject(object.snapshot.locations.bar.snapshot.address.id);
+                    }
+                });
+                return Promise.resolve(objects);
+            case '["snapshot.employedAt","snapshot.locations","snapshot.address"]':
+                objects.forEach(function(object) {
+                    if (object.snapshot.employedAt.snapshot.locations.foo) {
+                        object.snapshot.employedAt.snapshot.locations.foo.snapshot.address =
+                            mockObject(object.snapshot.employedAt.snapshot.locations.foo.snapshot.address.id);
+                    }
+                    if (object.snapshot.employedAt.snapshot.locations.bar) {
+                        object.snapshot.employedAt.snapshot.locations.bar.snapshot.address =
+                            mockObject(object.snapshot.employedAt.snapshot.locations.bar.snapshot.address.id);
                     }
                 });
                 return Promise.resolve(objects);
@@ -1097,7 +1130,8 @@ function mockObject(id) {
                     some: 'someone@somewhere.com',
                     tst: 'll@thisted.dk'
                 },
-                foreignIds: { opusId: '35', employeeId: '0035' }
+                foreignIds: { opusId: '35', employeeId: '0035' },
+                aliases: { taeller: '21', naevner: '31' }
             }
         };
     case 'ansaettelse2':
@@ -1113,7 +1147,8 @@ function mockObject(id) {
                     some: 'someone@somewhere.com',
                     tst: 'ss@thisted.dk'
                 },
-                foreignIds: { opusId: '36', employeeId: '0036' }
+                foreignIds: { opusId: '36', employeeId: '0036' },
+                aliases: { taeller: '22', naevner: '32' }
             }
         };
     case 'ansaettelse3':
@@ -1129,7 +1164,8 @@ function mockObject(id) {
                     some: 'someone@somewhere.com',
                     tst: 'bn@thisted.dk'
                 },
-                foreignIds: { opusId: '37', employeeId: '0037' }
+                foreignIds: { opusId: '37', employeeId: '0037' },
+                aliases: { taeller: '23', naevner: '33' }
             }
         };
     case 'user-account':
