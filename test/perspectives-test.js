@@ -40,7 +40,7 @@ describe('Perspectives', function() {
             var perspectives = this.perspectives;
             expect(new Promise(function(resolve) {
                 perspectives.units(Object.assign({
-                    body: { activityFilter: 'active-only' }
+                    body: { activationFilter: 'active-only' }
                 }, request), {
                     send: function(body) {
                         resolve({ status: 200, body: JSON.parse(JSON.stringify(body)) });
@@ -56,7 +56,7 @@ describe('Perspectives', function() {
             var perspectives = this.perspectives;
             expect(new Promise(function(resolve) {
                 perspectives.units(Object.assign({
-                    body: { activityFilter: 'active-and-future' }
+                    body: { activationFilter: 'active-and-future' }
                 }, request), {
                     send: function(body) {
                         resolve({ status: 200, body: JSON.parse(JSON.stringify(body)) });
@@ -74,7 +74,7 @@ describe('Perspectives', function() {
             var perspectives = this.perspectives;
             expect(new Promise(function(resolve) {
                 perspectives.units(Object.assign({
-                    body: { activityFilter: 'all' }
+                    body: { activationFilter: 'all' }
                 }, request), {
                     send: function(body) {
                         resolve({ status: 200, body: JSON.parse(JSON.stringify(body)) });
@@ -92,7 +92,7 @@ describe('Perspectives', function() {
             var perspectives = this.perspectives;
             expect(new Promise(function(resolve) {
                 perspectives.units(Object.assign({
-                    body: { activityFilter: 'gobbledygook' }
+                    body: { activationFilter: 'gobbledygook' }
                 }, request), {
                     send: function(body) {
                         resolve({ status: 200, body: JSON.parse(JSON.stringify(body)) });
