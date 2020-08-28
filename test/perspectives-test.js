@@ -9,14 +9,12 @@ var expect = chai.expect;
 var Perspectives = require('../lib/perspectives/perspectives');
 var util = require('../lib/util');
 var models = require('re-models').model;
+var confRo = require('re-conf-ro').model;
 var csvjson = require('csvjson');
 
 var context = { domain: 'thisted' };
 var request = { header: function() { return JSON.stringify(context); } };
 var next = console.log;
-
-// TODO: Certain responsibilities should be common across customers
-var THISTED_PERSONALEANSVAR = '87341d78-23db-4d78-94cf-5fd02b73060a';
 
 describe('Perspectives', function() {
     before(_before);
@@ -201,7 +199,7 @@ describe('Perspectives', function() {
 	      EnhedEksterntId: '50128',
 	      EnhedNavn: 'Plaf',
               EnhedAdresse: 'Skolegade 15, 7700 Thisted, Danmark',
-              'LederEmail thisted.dk': '',
+              LederEmail: '',
               LederLederniveau: '',
               LederMedarbejdernummer: '',
               LederNavn: '',
@@ -231,7 +229,7 @@ describe('Perspectives', function() {
               EnhedAdresse: 'Skolegade 15, 7700 Thisted, Danmark',
               LederNavn: 'Svend Svendsen',
               LederMedarbejdernummer: '0036',
-              'LederEmail thisted.dk': 'ss@thisted.dk',
+              LederEmail: 'ss@thisted.dk',
               LederStilling: 'Teamleder',
               LederLederniveau: '42',
               StiFraRod: 'Plaf',
@@ -259,7 +257,7 @@ describe('Perspectives', function() {
               EnhedAdresse: 'Skolegade 20, 7700 Thisted, Danmark',
               LederNavn: 'Svend Svendsen',
               LederMedarbejdernummer: '0036',
-              'LederEmail thisted.dk': 'ss@thisted.dk',
+              LederEmail: 'ss@thisted.dk',
               LederStilling: 'Teamleder',
               LederLederniveau: '42',
               StiFraRod: 'Plaf < Plif',
@@ -1047,7 +1045,7 @@ function mockObject(id) {
                 responsibilities: {
                     fooRes: { id: 'foo-res' },
                     barRes: { id: 'bar-res' },
-                    personale: { id: THISTED_PERSONALEANSVAR }
+                    personale: { id: confRo.ro.instances.responsibility.personale.id }
                 },
                 aliases: { ledelsesniveau: '42' }
             }
@@ -1062,7 +1060,7 @@ function mockObject(id) {
                     fooRes: { id: 'foo-res' },
                     barRes: { id: 'bar-res' },
                     lederRes: { id: 'leder-res' },
-                    personale: { id: THISTED_PERSONALEANSVAR }
+                    personale: { id: confRo.ro.instances.responsibility.personale.id }
                 }
             }
         };
@@ -1109,9 +1107,9 @@ function mockObject(id) {
                 foreignIds: { responsibility: '1011' }
             }
         };
-    case THISTED_PERSONALEANSVAR:
+    case confRo.ro.instances.responsibility.personale.id:
         return {
-            id: THISTED_PERSONALEANSVAR,
+            id: confRo.ro.instances.responsibility.personale.id,
             snapshot: {
                 name: 'Personaleansvar',
                 foreignIds: { responsibility: '45' }
