@@ -208,6 +208,7 @@ describe('Perspectives', function() {
               LederStilling: '',
               StiFraRod: 'Plaf',
               'Bruger System 1': 'kai',
+              UniloginRoller: 'Lærer, Pædagog',
               CprNummer: '0303030303',
               Telefon: '23232323',
               'Email thisted.dk': 'ss@thisted.dk',
@@ -237,7 +238,8 @@ describe('Perspectives', function() {
               LederStilling: 'Teamleder',
               LederLederniveau: '42',
               StiFraRod: 'Plaf',
-              'Bruger System 1': 'kai',
+              'Bruger System 1': '',
+              UniloginRoller: '',
               CprNummer: '0404040404',
               Telefon: '23232323',
               'Email thisted.dk': 'bn@thisted.dk',
@@ -268,6 +270,7 @@ describe('Perspectives', function() {
               LederLederniveau: '42',
               StiFraRod: 'Plaf < Plif',
               'Bruger System 1': 'vai',
+              UniloginRoller: 'Lærer',
               CprNummer: '0101010101',
               Telefon: '23232323',
               'Email thisted.dk': 'll@thisted.dk',
@@ -841,9 +844,12 @@ function _before() {
                 return Promise.resolve(objects);
             case '"snapshot.userAccounts"':
                 objects.forEach(function(object) {
-                    object.snapshot.userAccounts = [
-                        object.id === 'ansaettelse' ? mockObject('user-account') : mockObject('user-account2')
-                    ];
+                  object.snapshot.userAccounts =
+                    object.id === 'ansaettelse'
+                      ? [ mockObject('user-account') ]
+                      : object.id === 'ansaettelse2'
+                        ? [ mockObject('user-account2') ]
+                        : [];
                 });
                 return Promise.resolve(objects);
             case '"snapshot.allocations"':
@@ -1179,7 +1185,8 @@ function mockObject(id) {
                 username: 'vai',
                 employments: { ansaettelse: { id: 'ansaettelse' } },
                 foreignIds: { aauId: '3001', staffId: '1001' },
-                systems: { buff: { id: 'system-1' } }
+                systems: { buff: { id: 'system-1' } },
+                roles: { Lærer: 'Lærer' }
             }
         };
     case 'user-account2':
@@ -1189,7 +1196,8 @@ function mockObject(id) {
                 username: 'kai',
                 employments: { ansaettelse: { id: 'ansaettelse2' } },
                 foreignIds: { aauId: '3002', staffId: '1002' },
-                systems: { buff: { id: 'system-1' } }
+                systems: { buff: { id: 'system-1' } },
+                roles: { Lærer: 'Lærer', Pædagog: 'Pædagog' }
             }
         };
     case 'right1':
