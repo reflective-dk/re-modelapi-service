@@ -435,6 +435,23 @@ describe('Perspectives', function() {
               HomeDirectory: '',
               HomeDrive: '',
 	      AktivFra: '',
+	      AktivTil: '' },
+            { Id: 'user-account-no-emp',
+              EksterntId: 'no-emp',
+              Navn: 'No Emp',
+              MedarbejderId: '',
+              MedarbejderEksterntId: '',
+              MedarbejderNavn: '',
+	      EnhedId: 'unassigned',
+	      EnhedEksterntId: '',
+	      EnhedNavn: '',
+              StiFraRod: '',
+              Brugernavn: 'no-emp',
+              'Email thisted.dk': '',
+              Systemer: 'System 1',
+              HomeDirectory: '',
+              HomeDrive: '',
+	      AktivFra: '',
 	      AktivTil: '' }
         ];
 
@@ -635,7 +652,8 @@ function _before() {
                 case models.ro.classes['user-account'].id:
                     return Promise.resolve({ objects: [
                         mockObject('user-account'),
-                        mockObject('user-account2')
+                        mockObject('user-account2'),
+                        mockObject('user-account-no-emp')
                     ] });
                 case models.ro.classes.right.id:
                     return Promise.resolve({ objects: [
@@ -791,9 +809,10 @@ function _before() {
                 return Promise.resolve(objects);
             case '"snapshot.employments"':
                 objects.forEach(function(object) {
-                    object.snapshot.employments = [
-                        mockObject(_.find(object.snapshot.employments).id)
-                    ];
+                    var id = _.get(_.find(_.get(object, 'snapshot.employments', {})), 'id');
+                    object.snapshot.employments = id ? [
+                        mockObject(id)
+                    ] : [];
                 });
                 return Promise.resolve(objects);
             case '["snapshot.employment","snapshot.position"]':
@@ -821,15 +840,19 @@ function _before() {
             case '["snapshot.employments","snapshot.employee"]':
                 objects.forEach(function(object) {
                     var employment = _.find(object.snapshot.employments);
-                    employment.snapshot.employee =
-                        mockObject(employment.snapshot.employee.id);
+                    if (employment) {
+                        employment.snapshot.employee =
+                            mockObject(employment.snapshot.employee.id);
+                    }
                 });
                 return Promise.resolve(objects);
             case '["snapshot.employments","snapshot.employedAt"]':
                 objects.forEach(function(object) {
                     var employment = _.find(object.snapshot.employments);
-                    employment.snapshot.employedAt =
-                        mockObject(employment.snapshot.employedAt.id);
+                    if (employment) {
+                        employment.snapshot.employedAt =
+                            mockObject(employment.snapshot.employedAt.id);
+                    }
                 });
                 return Promise.resolve(objects);
             case '"snapshot.assignments"':
@@ -1198,6 +1221,16 @@ function mockObject(id) {
                 foreignIds: { aauId: '3002', staffId: '1002' },
                 systems: { buff: { id: 'system-1' } },
                 roles: { Lærer: 'Lærer', Pædagog: 'Pædagog' }
+            }
+        };
+    case 'user-account-no-emp':
+        return {
+            id: 'user-account-no-emp',
+            snapshot: {
+                username: 'no-emp',
+                foreignIds: { aauId: '3099', staffId: '1099', accountName: 'No Emp' },
+                systems: { buff: { id: 'system-1' } },
+                roles: {}
             }
         };
     case 'right1':
