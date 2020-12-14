@@ -220,7 +220,7 @@ describe('Perspectives', function() {
               StillingKortNavn: 'TMLED',
               TimetalNaevner: '32',
               TimetalTaeller: '22',
-	      AktivFra: '',
+	      AktivFra: '02-02-2002',
 	      AktivTil: '' },
             { Id: 'ansaettelse3',
 	      EksterntId: '0037',
@@ -251,7 +251,7 @@ describe('Perspectives', function() {
               StillingKortNavn: 'GLVMND',
               TimetalNaevner: '33',
               TimetalTaeller: '23',
-	      AktivFra: '',
+	      AktivFra: '03-03-2003',
 	      AktivTil: '' },
             { Id: 'ansaettelse',
 	      EksterntId: '0035',
@@ -282,7 +282,7 @@ describe('Perspectives', function() {
               StillingKortNavn: 'SEKLED',
               TimetalNaevner: '31',
               TimetalTaeller: '21',
-	      AktivFra: '',
+	      AktivFra: '01-01-2001',
 	      AktivTil: '' }
         ];
 
@@ -408,6 +408,8 @@ describe('Perspectives', function() {
               MedarbejderId: 'ansaettelse2',
               MedarbejderEksterntId: '0036',
               MedarbejderNavn: 'Svend Svendsen',
+              MedarbejderAktivFra: '02-02-2002',
+              MedarbejderAktivTil: '',
 	      EnhedId: 'id-50128',
 	      EnhedEksterntId: '50128',
 	      EnhedNavn: 'Plaf',
@@ -425,6 +427,8 @@ describe('Perspectives', function() {
               MedarbejderId: 'ansaettelse',
               MedarbejderEksterntId: '0035',
               MedarbejderNavn: 'Lars Larsen',
+              MedarbejderAktivFra: '01-01-2001',
+              MedarbejderAktivTil: '',
 	      EnhedId: 'id-50150',
 	      EnhedEksterntId: '50150',
 	      EnhedNavn: 'Plif',
@@ -442,6 +446,8 @@ describe('Perspectives', function() {
               MedarbejderId: '',
               MedarbejderEksterntId: '',
               MedarbejderNavn: '',
+              MedarbejderAktivFra: '',
+              MedarbejderAktivTil: '',
 	      EnhedId: 'unassigned',
 	      EnhedEksterntId: '',
 	      EnhedNavn: '',
@@ -1164,7 +1170,8 @@ function mockObject(id) {
                     tst: 'll@thisted.dk'
                 },
                 foreignIds: { opusId: '35', employeeId: '0035' },
-                aliases: { taeller: '21', naevner: '31' }
+                aliases: { taeller: '21', naevner: '31' },
+                activeFrom: '2001-01-01T00:00:00.000Z'
             }
         };
     case 'ansaettelse2':
@@ -1181,7 +1188,8 @@ function mockObject(id) {
                     tst: 'ss@thisted.dk'
                 },
                 foreignIds: { opusId: '36', employeeId: '0036' },
-                aliases: { taeller: '22', naevner: '32' }
+                aliases: { taeller: '22', naevner: '32' },
+                activeFrom: '2002-02-02T00:00:00.000Z'
             }
         };
     case 'ansaettelse3':
@@ -1198,7 +1206,8 @@ function mockObject(id) {
                     tst: 'bn@thisted.dk'
                 },
                 foreignIds: { opusId: '37', employeeId: '0037' },
-                aliases: { taeller: '23', naevner: '33' }
+                aliases: { taeller: '23', naevner: '33' },
+                activeFrom: '2003-03-03T00:00:00.000Z'
             }
         };
     case 'user-account':
