@@ -1,6 +1,8 @@
 var api = new (require('reflective-api'))();
 var perspectives = new (require('../lib/perspectives/perspectives'))(api);
-var next = function (){};
+var next = function (error){
+    console.error(error);
+};
 
 var context = {
     domain: 'thisted'
