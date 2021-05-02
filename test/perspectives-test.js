@@ -648,7 +648,8 @@ function _before() {
                     ] });
                 case models.entity.classes.hierarchy.id:
                     return Promise.resolve({ objects: [
-                        mockObject('4849d400-406d-4070-a745-6fe1fe47204f')
+                        mockObject('4849d400-406d-4070-a745-6fe1fe47204f'),
+                        mockObject('do-not-pick-me')
                     ] });
                 case models.ro.classes['role-assignment'].id:
                     return Promise.resolve({ objects: [
@@ -1010,6 +1011,20 @@ function mockObject(id) {
             snapshot:
             { class: models.entity.classes.hierarchy.ref,
               name: 'Administrativt',
+              category: 'administrative',
+              pathElements: [
+                  { parentType: { id: models.ro.classes.unit.id },
+                    relation: 'parents.administrativ'
+                  }
+              ],
+              from: '2018-01-01T00:00:00.000Z' } };
+    case 'do-not-pick-me':
+        return {
+            id: 'do-not-pick-me',
+            snapshot:
+            { class: models.entity.classes.hierarchy.ref,
+              name: 'Another Hierarchy',
+              category: 'another-category',
               pathElements: [
                   { parentType: { id: models.ro.classes.unit.id },
                     relation: 'parents.administrativ'
