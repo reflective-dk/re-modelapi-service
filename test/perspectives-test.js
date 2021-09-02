@@ -658,7 +658,6 @@ function _before() {
                     ] });
                 case models.ro.classes['user-account'].id:
                     return Promise.resolve({ objects: [
-                        mockObject('user-account'),
                         mockObject('user-account-disabled'),
                         mockObject('user-account2'),
                         mockObject('user-account-no-emp')
