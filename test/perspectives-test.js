@@ -659,6 +659,7 @@ function _before() {
                 case models.ro.classes['user-account'].id:
                     return Promise.resolve({ objects: [
                         mockObject('user-account'),
+                        mockObject('user-account-disabled'),
                         mockObject('user-account2'),
                         mockObject('user-account-no-emp')
                     ] });
@@ -1234,6 +1235,18 @@ function mockObject(id) {
                 foreignIds: { aauId: '3001', staffId: '1001' },
                 systems: { buff: { id: 'system-1' } },
                 roles: { Lærer: 'Lærer' }
+            }
+        };
+    case 'user-account-disabled':
+        return {
+            id: 'user-account',
+            snapshot: {
+                username: 'vai',
+                employments: { ansaettelse: { id: 'ansaettelse' } },
+                foreignIds: { aauId: '3001', staffId: '1001' },
+                systems: { buff: { id: 'system-1' } },
+                roles: { Lærer: 'Lærer' },
+                disabled: true
             }
         };
     case 'user-account2':
