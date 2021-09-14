@@ -221,7 +221,7 @@ describe('Perspectives', function() {
               StillingKortNavn: 'TMLED',
               TimetalNaevner: '32',
               TimetalTaeller: '22',
-              'UNI-Login Institutionnummer': '',
+              'UNI-Login Institutionsnummer': '',
 	      AktivFra: '02-02-2002',
 	      AktivTil: '' },
             { Id: 'ansaettelse3',
@@ -254,7 +254,7 @@ describe('Perspectives', function() {
               StillingKortNavn: 'GLVMND',
               TimetalNaevner: '33',
               TimetalTaeller: '23',
-              'UNI-Login Institutionnummer': '',
+              'UNI-Login Institutionsnummer': '',
 	      AktivFra: '03-03-2003',
 	      AktivTil: '' },
             { Id: 'ansaettelse',
@@ -287,7 +287,7 @@ describe('Perspectives', function() {
               StillingKortNavn: 'SEKLED',
               TimetalNaevner: '31',
               TimetalTaeller: '21',
-              'UNI-Login Institutionnummer': 'G12345',
+              'UNI-Login Institutionsnummer': 'G12345',
 	      AktivFra: '01-01-2001',
 	      AktivTil: '' }
         ];
