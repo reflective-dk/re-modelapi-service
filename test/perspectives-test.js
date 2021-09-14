@@ -208,6 +208,7 @@ describe('Perspectives', function() {
               LederStilling: '',
               StiFraRod: 'Plaf',
               'Bruger System 1': 'kai',
+              'Bruger UNI-Login': '',
               UniloginRoller: 'Lærer, Pædagog',
               CprNummer: '0303030303',
               Telefon: '23232323',
@@ -220,6 +221,7 @@ describe('Perspectives', function() {
               StillingKortNavn: 'TMLED',
               TimetalNaevner: '32',
               TimetalTaeller: '22',
+              'UNI-Login Institutionnummer': '',
 	      AktivFra: '02-02-2002',
 	      AktivTil: '' },
             { Id: 'ansaettelse3',
@@ -239,6 +241,7 @@ describe('Perspectives', function() {
               LederLederniveau: '42',
               StiFraRod: 'Plaf',
               'Bruger System 1': '',
+              'Bruger UNI-Login': '',
               UniloginRoller: '',
               CprNummer: '0404040404',
               Telefon: '23232323',
@@ -251,6 +254,7 @@ describe('Perspectives', function() {
               StillingKortNavn: 'GLVMND',
               TimetalNaevner: '33',
               TimetalTaeller: '23',
+              'UNI-Login Institutionnummer': '',
 	      AktivFra: '03-03-2003',
 	      AktivTil: '' },
             { Id: 'ansaettelse',
@@ -269,7 +273,8 @@ describe('Perspectives', function() {
               LederStilling: 'Teamleder',
               LederLederniveau: '42',
               StiFraRod: 'Plaf < Plif',
-              'Bruger System 1': 'vai',
+              'Bruger System 1': '',
+              'Bruger UNI-Login': 'vai',
               UniloginRoller: 'Lærer',
               CprNummer: '0101010101',
               Telefon: '23232323',
@@ -282,6 +287,7 @@ describe('Perspectives', function() {
               StillingKortNavn: 'SEKLED',
               TimetalNaevner: '31',
               TimetalTaeller: '21',
+              'UNI-Login Institutionnummer': 'G12345',
 	      AktivFra: '01-01-2001',
 	      AktivTil: '' }
         ];
@@ -338,6 +344,7 @@ describe('Perspectives', function() {
               RolleEksterntId: '8',
               RolleNavn: 'Leder',
               'Bruger System 1': 'kai',
+              'Bruger UNI-Login': '',
               Telefon: '23232323',
               'Email thisted.dk': 'ss@thisted.dk',
               Ansvar: 'Foo Responsibility, Bar Responsibility, Personaleansvar',
@@ -354,7 +361,8 @@ describe('Perspectives', function() {
               RolleEksterntId: '9',
               RolleNavn: 'Altmuligmand',
               StiFraRod: 'Plaf < Plif',
-              'Bruger System 1': 'vai',
+              'Bruger System 1': '',
+              'Bruger UNI-Login': 'vai',
               Telefon: '23232323',
               'Email thisted.dk': 'll@thisted.dk',
               Ansvar: 'Foo Responsibility, Bar Responsibility',
@@ -799,6 +807,9 @@ function _before() {
                 objects.forEach(function(object) {
                     object.snapshot.systems =
                         [ mockObject(object.snapshot.systems.buff.id) ];
+                        if (object.snapshot.systems.unilogin) {
+                            object.snapshot.systems.push(mockObject(object.snapshot.systems.unilogin.id));
+                        }
                 });
                 return Promise.resolve(objects);
             case '"snapshot.responsibilities"':
@@ -892,7 +903,11 @@ function _before() {
             case '["snapshot.userAccounts","snapshot.systems"]':
                 objects.forEach(function(object) {
                     Object.keys(object.snapshot.userAccounts).forEach(function(k) {
-                        object.snapshot.userAccounts[k].snapshot.systems = [ mockObject('system-1') ];
+                        if (object.snapshot.userAccounts[k].snapshot.systems.unilogin) {
+                            object.snapshot.userAccounts[k].snapshot.systems = [ mockObject('unilogin') ];
+                        } else {
+                            object.snapshot.userAccounts[k].snapshot.systems = [ mockObject('system-1') ];
+                        }
                     });
                 });
                 return Promise.resolve(objects);
@@ -1231,8 +1246,8 @@ function mockObject(id) {
             snapshot: {
                 username: 'vai',
                 employments: { ansaettelse: { id: 'ansaettelse' } },
-                foreignIds: { aauId: '3001', staffId: '1001' },
-                systems: { buff: { id: 'system-1' } },
+                foreignIds: { institutionNumber: 'G12345' },
+                systems: { unilogin: { id: 'a1f5345c-5d45-4c05-9b0b-0336f6630c79' }  },
                 roles: { Lærer: 'Lærer' }
             }
         };
@@ -1298,6 +1313,13 @@ function mockObject(id) {
             id: 'system-1',
             snapshot: {
                 name: 'System 1'
+            }
+        };
+    case 'unilogin':
+        return {
+            id: 'a1f5345c-5d45-4c05-9b0b-0336f6630c79',
+            snapshot: {
+                name: 'UNI-Login'
             }
         };
     case 'allocation-right1':
