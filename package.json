@@ -34,6 +34,7 @@
     "moment": "^2.24.0",
     "pumpify": "^2.0.1",
     "re-auth": "git+ssh://git@github.com/reflective-dk/re-auth.git",
+    "re-conf-aau": "git+ssh://git@github.com/reflective-dk/re-conf-aau.git",
     "re-conf-ro": "git+ssh://git@github.com/reflective-dk/re-conf-ro.git",
     "re-models": "git+ssh://git@github.com/reflective-dk/re-models.git",
     "re-stream-util": "git+ssh://git@github.com/reflective-dk/re-stream-util.git",
