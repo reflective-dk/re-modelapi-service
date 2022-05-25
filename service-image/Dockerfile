@@ -1,4 +1,4 @@
-FROM gcr.io/city-7337/base:node-10.20.1
+FROM gcr.io/city-7337/base:node-12.15.0
 
 COPY package.json package.json
 RUN npm install
