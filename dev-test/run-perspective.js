@@ -1,5 +1,7 @@
 var api = new (require('reflective-api'))();
 var perspectives = new (require('../lib/perspectives/perspectives'))(api);
+var fs = require('fs');
+
 var next = function (error){
     console.error(error);
 };
@@ -23,6 +25,7 @@ var response = {
     },
     send: function (data) {
         console.timeEnd('taken');
+        fs.writeFileSync('./units.json', JSON.stringify(data, null, '  '));
         //console.log(data);
     }
 };

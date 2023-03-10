@@ -90,3 +90,17 @@ app.post('/api/perspective/locations', auth(JWT_SECRET), express.json(), locatio
 function locationPerspective(request, response, next) {
     return perspectives.locations(request, response, next);
 }
+
+app.use(function (error, request, response, next) {
+  logger.error(error);
+
+  if (response.headersSent) {
+    return next(response);
+  }
+  try {
+    JSON.parse(error);
+    response.status(500).send(error);
+  } catch (parseError) {
+    response.status(500).send({ error: error.message });
+  }
+});
