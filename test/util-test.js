@@ -1,4 +1,10 @@
 "use strict";
+const bunyan = require('bunyan');
+global.global_logger = bunyan.createLogger({
+  name: 're-modelapi-service',
+  serializers: bunyan.stdSerializers,
+  level: 'error'
+});
 
 var chai = require('chai');
 chai.use(require('chai-iso8601')());
