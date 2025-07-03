@@ -15,7 +15,7 @@ jobs:
       - run:
           name: Build application Docker image
           command: |
-            gcloud docker -- build -t gcr.io/city-7337/modelapi service-image
+            gcloud docker -- build -t eu.gcr.io/city-7337/modelapi service-image
       - run:
           name: Build application test Docker image
           command: |
@@ -27,7 +27,7 @@ jobs:
       - run:
           name: Run modelapi service
           command: |
-            gcloud docker -- run -d --name modelapi -p 8080:8080 gcr.io/city-7337/modelapi
+            gcloud docker -- run -d --name modelapi -p 8080:8080 eu.gcr.io/city-7337/modelapi
             sleep 5
       - run:
           name: Logs
@@ -37,5 +37,5 @@ jobs:
           name: Push application Docker image
           command: |
             if [ "${CIRCLE_BRANCH}" == "master" ]; then
-              gcloud docker -- push gcr.io/city-7337/modelapi
+              gcloud docker -- push eu.gcr.io/city-7337/modelapi
             fi
